@@ -46,7 +46,7 @@ Também é possível usar a CLI (`vercel` e depois `vercel --prod`), mas ela é 
 
 ## Configuração rápida
 
-O número central do WhatsApp está na constante `WHATSAPP_NUMBER`, no início de `app.js`. Altere-o mantendo o código do país e DDD, somente com números.
+O atendimento central é pelo telefone **(31) 2510-2500**. O botão de WhatsApp usa o número `553125102500`, configurado na constante `WHATSAPP_NUMBER`, no início de `app.js`, e abre a conversa com a mensagem: “Olá, vim pelo app Reforma Profissional e quero solicitar um serviço.”
 
 ## Próximos passos para produção
 
@@ -58,4 +58,3 @@ O número central do WhatsApp está na constante `WHATSAPP_NUMBER`, no início d
 6. **Operação:** criar disponibilidade, área de cobertura, preços/orçamentos, agenda, avaliações e canais de suporte.
 7. **Segurança e privacidade:** termos jurídicos, LGPD, criptografia, retenção de dados, logs e proteção contra abuso.
 8. **PWA completo:** adicionar ícones próprios em múltiplos tamanhos, atalhos e screenshots quando os ativos visuais forem aprovados.
-

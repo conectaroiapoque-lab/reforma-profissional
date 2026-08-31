@@ -1,4 +1,4 @@
-const CACHE_NAME = "reforma-profissional-v1";
+const CACHE_NAME = "reforma-profissional-v2";
 const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
