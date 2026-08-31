@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#092b4c">
+  <meta name="description" content="Serviços de reforma e manutenção com atendimento rápido.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <title>Reforma Profissional</title>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#inicio" aria-label="Reforma Profissional — início"><span class="brand-mark">RP</span><span>Reforma<br><b>Profissional</b></span></a>
+    <nav aria-label="Navegação principal">
+      <button class="nav-link" data-view="home">Início</button>
+      <button class="nav-link" data-view="tracking">Acompanhar</button>
+      <button class="nav-link admin-link" data-view="admin">Painel Admin</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="home-view" class="view active">
+      <section class="hero" id="inicio">
+        <div class="hero-copy">
+          <span class="eyebrow">CASA E NEGÓCIO EM BOAS MÃOS</span>
+          <h1>Reforma <span>Profissional</span></h1>
+          <p class="lead">Serviços de reforma e manutenção com atendimento rápido.</p>
+          <p>Solicite pelo celular, acompanhe o prestador e receba atendimento com segurança.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" data-start>Solicitar Serviço Agora <span>→</span></button>
+            <button class="btn btn-light" data-view="tracking">Acompanhar Serviço</button>
+            <a class="btn btn-whatsapp whatsapp-general" target="_blank" rel="noopener">💬 Falar no WhatsApp</a>
+          </div>
+        </div>
+        <div class="hero-panel" aria-label="Resumo do atendimento">
+          <div class="pulse">✓</div><div><strong>Atendimento inteligente</strong><small>Profissionais próximos de você</small></div>
+          <div class="mini-route"><i></i><span></span><i></i></div>
+          <div class="hero-stats"><span><b>4.9 ★</b> avaliação média</span><span><b>25 min</b> previsão</span></div>
+        </div>
+      </section>
+
+      <section class="trust-strip" aria-label="Nossos diferenciais"></section>
+
+      <section class="section">
+        <div class="section-head"><div><span class="eyebrow">RESOLVA EM POUCOS CLIQUES</span><h2>Serviços mais procurados</h2></div><button class="text-btn" data-start>Solicitar outro serviço →</button></div>
+        <div class="card-grid services-grid" id="popular-services"></div>
+      </section>
+
+      <section class="section alt">
+        <div class="section-head"><div><span class="eyebrow">SOLUÇÕES DO DIA A DIA</span><h2>Problemas mais comuns</h2></div></div>
+        <div class="chip-grid" id="common-problems"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><div><span class="eyebrow">DO PEQUENO REPARO À OBRA COMPLETA</span><h2>Reforma e construção</h2></div></div>
+        <div class="chip-grid" id="construction-services"></div>
+      </section>
+
+      <section class="section assistant-section">
+        <div class="assistant-copy"><span class="eyebrow light">ASSISTENTE INTELIGENTE</span><h2>Assistente Inteligente<br>Reforma Profissional</h2><p>Conte o que está acontecendo. Nosso assistente ajuda a identificar o profissional ideal.</p><div class="bot-face">✦ <span>IA simulada</span></div></div>
+        <div class="assistant-box"><h3>Como podemos ajudar?</h3><div class="assistant-options" id="assistant-options"></div><div id="assistant-answer" class="assistant-answer" hidden><span>✦ Sugestão inteligente</span><p></p><button class="btn btn-primary" id="assistant-request">Solicitar este serviço</button></div></div>
+      </section>
+
+      <section class="section safety">
+        <div><span class="eyebrow">SUA TRANQUILIDADE PRIMEIRO</span><h2>Atendimento seguro do início ao fim</h2><p class="security-note">🛡️ Por segurança, confira o nome e a foto do profissional antes de autorizar a entrada.</p></div>
+        <div class="safety-grid" id="safety-list"></div>
+      </section>
+    </section>
+
+    <section id="request-view" class="view page-view">
+      <button class="back-btn" data-view="home">← Voltar ao início</button>
+      <div class="flow-header"><span class="eyebrow">SOLICITAR SERVIÇO</span><h1>Do que você precisa?</h1><p>Leva menos de 2 minutos.</p></div>
+      <div class="steps" aria-label="Progresso"><div class="step active"><i>1</i><span>Serviço</span></div><div class="step"><i>2</i><span>Detalhes</span></div><div class="step"><i>3</i><span>Local</span></div><div class="step"><i>4</i><span>Cliente</span></div></div>
+      <form id="request-form" class="form-card">
+        <fieldset class="form-step active" data-step="1"><legend>Escolha o tipo de serviço</legend><div class="choice-grid" id="service-types"></div><div class="selected-detail" id="selected-detail" hidden></div></fieldset>
+        <fieldset class="form-step" data-step="2"><legend>Conte um pouco mais</legend><label>Descrição rápida do problema<textarea name="description" required rows="4" placeholder="Ex.: Minha torneira está vazando desde ontem..."></textarea></label><label>Foto opcional do local/problema<input type="file" name="photo" accept="image/*"><small>A foto é somente para visualização local e não será salva neste MVP.</small></label><label>Qual a urgência?</label><div class="choice-grid urgency" id="urgency-options"></div><div id="schedule-field" hidden><label>Data e horário<input type="datetime-local" name="schedule"></label></div></fieldset>
+        <fieldset class="form-step" data-step="3"><legend>Onde será o atendimento?</legend><button type="button" class="btn btn-location" id="get-location">◎ Usar minha localização</button><p id="location-status" class="location-status">Ou informe o endereço manualmente.</p><input type="hidden" name="latitude"><input type="hidden" name="longitude"><div class="form-grid"><label class="wide">Endereço<input name="address" required autocomplete="street-address" placeholder="Rua, avenida..."></label><label>Número<input name="number" required inputmode="numeric" placeholder="123"></label><label>Complemento<input name="complement" placeholder="Apto, bloco..."></label><label>Bairro<input name="neighborhood" required placeholder="Seu bairro"></label><label>Cidade<input name="city" required placeholder="Sua cidade"></label><label class="wide">Referência<input name="reference" placeholder="Próximo a..."></label></div></fieldset>
+        <fieldset class="form-step" data-step="4"><legend>Seus dados</legend><label>Nome completo<input name="name" required autocomplete="name" placeholder="Como podemos chamar você?"></label><label>WhatsApp<input name="whatsapp" required autocomplete="tel" inputmode="tel" placeholder="(31) 99999-9999"></label><label class="check"><input type="checkbox" name="terms" required><span>Aceito os termos de uso e autorizo o contato sobre este atendimento.</span></label></fieldset>
+        <div class="form-actions"><button type="button" class="btn btn-light" id="prev-step" hidden>Voltar</button><button type="button" class="btn btn-primary" id="next-step">Continuar →</button><button type="submit" class="btn btn-primary" id="submit-request" hidden>Confirmar Solicitação ✓</button></div>
+      </form>
+    </section>
+
+    <section id="success-view" class="view page-view narrow"><div class="success-icon">✓</div><span class="eyebrow">PEDIDO CONFIRMADO</span><h1>Solicitação recebida.</h1><p class="lead">Estamos localizando o melhor profissional para você.</p><div class="protocol-box">Seu protocolo <strong id="success-protocol"></strong><small>Guarde este número para acompanhar o atendimento.</small></div><div class="stack-actions"><button class="btn btn-primary" data-view="tracking">Acompanhar Serviço →</button><a class="btn btn-whatsapp" id="success-whatsapp" target="_blank" rel="noopener">💬 Falar no WhatsApp</a></div></section>
+
+    <section id="tracking-view" class="view page-view">
+      <button class="back-btn" data-view="home">← Voltar ao início</button>
+      <div class="section-head"><div><span class="eyebrow">ACOMPANHAMENTO</span><h1>Seu atendimento</h1><p id="tracking-protocol">Faça uma solicitação para começar.</p></div><span class="live-badge">● Atualização em tempo real</span></div>
+      <div id="empty-tracking" class="empty-state"><span>⌖</span><h2>Nenhum serviço para acompanhar</h2><p>Solicite um atendimento e acompanhe cada etapa por aqui.</p><button class="btn btn-primary" data-start>Solicitar Serviço</button></div>
+      <div id="tracking-content" hidden>
+        <div class="tracking-layout"><div>
+          <div class="map-placeholder"><div class="map-lines"></div><div class="map-pin">⌂</div><div class="provider-pin">●</div><div class="map-label"><b>Mapa em tempo real em breve</b><span id="map-address"></span><small id="map-status"></small></div></div>
+          <div class="status-card"><h2>Status do atendimento</h2><ol class="status-timeline" id="status-timeline"></ol></div>
+        </div><aside class="provider-card"><div class="provider-head"><div class="avatar" id="provider-avatar">JT</div><div><small>SEU PROFISSIONAL</small><h2 id="provider-name">João Técnico</h2><p id="provider-specialty">Marido de aluguel</p></div><span class="rating" id="provider-rating">★ 4.9</span></div><div class="provider-stats"><span><b id="provider-jobs">328</b> atendimentos</span><span><b id="provider-experience">8 anos</b> experiência</span></div><div class="eta"><span>Previsão de chegada</span><strong id="provider-eta">25 minutos</strong><small id="provider-datetime"></small></div><a class="btn btn-whatsapp" id="provider-whatsapp" target="_blank" rel="noopener">💬 Falar com o prestador</a><button class="btn btn-light" id="share-tracking">↗ Compartilhar acompanhamento</button></aside></div>
+        <div class="notifications"><h2>Atualizações</h2><div id="notifications-list"></div><small><!-- Futuro: integrar Web Push/Push API e backend para notificações reais. -->As notificações push estarão disponíveis em uma próxima versão.</small></div>
+      </div>
+    </section>
+
+    <section id="admin-view" class="view page-view admin-view">
+      <button class="back-btn" data-view="home">← Voltar ao site</button><div class="section-head"><div><span class="eyebrow">GESTÃO LOCAL • MVP</span><h1>Painel Administrativo</h1><p>Dados salvos somente neste navegador.</p></div><button class="btn btn-primary" data-start>+ Nova solicitação</button></div>
+      <div class="metrics"><div><span>Total de solicitações</span><strong id="metric-total">0</strong></div><div><span>Solicitações novas</span><strong id="metric-new">0</strong></div><div><span>Em andamento</span><strong id="metric-progress">0</strong></div><div><span>Finalizadas</span><strong id="metric-done">0</strong></div></div>
+      <div class="admin-card"><div class="section-head"><div><h2>Solicitações</h2><p>Gerencie status e profissionais.</p></div><button class="text-btn" id="refresh-admin">↻ Atualizar</button></div><div id="admin-list" class="admin-list"></div></div>
+    </section>
+  </main>
+  <footer><div class="brand"><span class="brand-mark">RP</span><span>Reforma <b>Profissional</b></span></div><p>Reforma, manutenção e assistência com segurança.</p><button class="nav-link admin-link" data-view="admin">Painel Admin</button><small>© <span id="year"></span> Reforma Profissional.</small></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js" defer></script>
+</body>
+</html>
