@@ -1,6 +1,7 @@
 "use strict";
 
-const WHATSAPP_NUMBER = "5531990008800";
+const WHATSAPP_NUMBER = "553125102500";
+const WHATSAPP_MESSAGE = "Olá, vim pelo app Reforma Profissional e quero solicitar um serviço.";
 const STORAGE_KEY = "reforma-profissional-solicitacoes";
 const CURRENT_KEY = "reforma-profissional-protocolo-atual";
 
@@ -52,7 +53,7 @@ function renderStaticContent(){
   $("#urgency-options").innerHTML=urgencies.map(item=>`<button type="button" class="choice" data-urgency="${item}">${item}</button>`).join("");
   $("#assistant-options").innerHTML=Object.keys(assistantData).map(item=>`<button type="button" data-assistant="${item}">${item}</button>`).join("");
   $("#safety-list").innerHTML=["Profissional identificado","Acompanhamento pelo app","Atendimento registrado","Suporte via WhatsApp","Orçamento antes da execução","Avaliação após o serviço"].map(item=>`<div class="safety-item"><span>✓</span>${item}</div>`).join("");
-  $(".whatsapp-general").href=whatsappUrl("Olá, vim pelo app Reforma Profissional e quero solicitar um serviço.");
+  $$(".whatsapp-general").forEach(link=>link.href=whatsappUrl(WHATSAPP_MESSAGE));
   $("#year").textContent=new Date().getFullYear();
 }
 
@@ -103,16 +104,31 @@ function updateSteps(){
   $("#prev-step").hidden=currentStep===1;
   $("#next-step").hidden=currentStep===4;
   $("#submit-request").hidden=currentStep!==4;
+  $("#request-form").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function showFieldError(message,field){
+  showToast(message);
+  field?.focus();
+  return false;
 }
 
 function validateStep(){
-  if(currentStep===1 && !$("[data-type].selected")){showToast("Escolha um tipo de serviço.");return false;}
+  if(currentStep===1 && !$("[data-type].selected")) return showFieldError("Escolha um tipo de serviço para continuar.",$("[data-type]"));
   if(currentStep===2){
-    if(!$("[name=description]").value.trim()){showToast("Descreva rapidamente o problema.");return false;}
-    if(!selectedUrgency){showToast("Escolha a urgência.");return false;}
-    if(selectedUrgency==="Agendar" && !$("[name=schedule]").value){showToast("Informe a data do agendamento.");return false;}
+    if(!$("[name=description]").value.trim()) return showFieldError("Descreva rapidamente o problema para continuar.",$("[name=description]"));
+    if(!selectedUrgency) return showFieldError("Escolha a urgência para continuar.",$("[data-urgency]"));
+    if(selectedUrgency==="Agendar" && !$("[name=schedule]").value) return showFieldError("Informe a data e o horário do agendamento.",$("[name=schedule]"));
   }
-  if(currentStep===3){for(const name of ["address","number","neighborhood","city"]){if(!$(`[name=${name}]`).value.trim()){showToast("Complete os campos obrigatórios do endereço.");return false;}}}
+  if(currentStep===3){
+    const fields={address:"endereço",number:"número",neighborhood:"bairro",city:"cidade"};
+    for(const [name,label] of Object.entries(fields)){const field=$(`[name=${name}]`);if(!field.value.trim()) return showFieldError(`Informe o campo ${label} para continuar.`,field);}
+  }
+  if(currentStep===4){
+    if(!$("[name=name]").value.trim()) return showFieldError("Informe seu nome para confirmar a solicitação.",$("[name=name]"));
+    if(!$("[name=whatsapp]").value.trim()) return showFieldError("Informe seu WhatsApp para confirmar a solicitação.",$("[name=whatsapp]"));
+    if(!$("[name=terms]").checked) return showFieldError("Aceite os termos para confirmar a solicitação.",$("[name=terms]"));
+  }
   return true;
 }
 
@@ -125,7 +141,8 @@ function generateProtocol(){
 function submitRequest(event){
   event.preventDefault();
   const form=event.currentTarget;
-  if(!form.checkValidity()){form.reportValidity();return;}
+  if(!validateStep()) return;
+  if(!form.checkValidity()){form.reportValidity();showToast("Revise os campos obrigatórios destacados.");return;}
   const data=Object.fromEntries(new FormData(form).entries());
   delete data.photo;
   const protocol=generateProtocol();
@@ -194,8 +211,8 @@ function bindEvents(){
     if(item&&event.target.closest(".assign-provider")){const name=$(".provider-select",item).value;if(!name){showToast("Selecione um prestador.");return;}updateRequest(item.dataset.protocol,r=>{r.provider=providers.find(p=>p.name===name);if(r.statusIndex<2){r.statusIndex=2;r.status=statuses[2];}});showToast("Prestador designado.");}
     if(item&&event.target.closest(".next-status")){updateRequest(item.dataset.protocol,r=>{r.statusIndex=Math.min(6,r.statusIndex+1);r.status=statuses[r.statusIndex];});showToast("Status atualizado.");}
   });
-  $("#next-step").addEventListener("click",()=>{if(validateStep()){currentStep++;updateSteps();}});
-  $("#prev-step").addEventListener("click",()=>{currentStep--;updateSteps();});
+  $("#next-step").addEventListener("click",()=>{if(validateStep()&&currentStep<4){currentStep++;updateSteps();}});
+  $("#prev-step").addEventListener("click",()=>{if(currentStep>1){currentStep--;updateSteps();}});
   $("#request-form").addEventListener("submit",submitRequest);
   $("#get-location").addEventListener("click",()=>{
     const status=$("#location-status");
