@@ -70,6 +70,7 @@ function startRequest(service=""){
   selectedUrgency="";
   currentStep=1;
   $("#request-form").reset();
+  $("#schedule-field").hidden=true;
   $$(".choice").forEach(button=>button.classList.remove("selected"));
   if(service){
     const inferred=inferType(service);
@@ -78,7 +79,7 @@ function startRequest(service=""){
     $("#selected-detail").innerHTML=`Selecionado: <strong>${escapeHtml(service)}</strong>`;
     $("#request-form [name=description]").value=service;
   }else $("#selected-detail").hidden=true;
-  updateSteps();
+  showStep(1, false);
   showView("request");
 }
 
@@ -98,36 +99,51 @@ function selectType(type){
   $$("[data-type]").forEach(button=>button.classList.toggle("selected",button.dataset.type===type));
 }
 
-function updateSteps(){
-  $$(".form-step").forEach(step=>step.classList.toggle("active",Number(step.dataset.step)===currentStep));
-  $$(".step").forEach((step,index)=>{ step.classList.toggle("active",index+1===currentStep); step.classList.toggle("done",index+1<currentStep); });
+function clearFormError(){
+  const error=$("#form-error");
+  error.hidden=true;
+  error.textContent="";
+  $$(".field-error", $("#request-form")).forEach(field=>field.classList.remove("field-error"));
+}
+
+function showStep(step, scroll=true){
+  currentStep=Math.max(1,Math.min(4,step));
+  clearFormError();
+  $$(".form-step", $("#request-form")).forEach(item=>item.classList.toggle("active",Number(item.dataset.step)===currentStep));
+  $$(".step", $("#request-view")).forEach((item,index)=>{ item.classList.toggle("active",index+1===currentStep); item.classList.toggle("done",index+1<currentStep); });
   $("#prev-step").hidden=currentStep===1;
   $("#next-step").hidden=currentStep===4;
   $("#submit-request").hidden=currentStep!==4;
-  $("#request-form").scrollIntoView({behavior:"smooth",block:"start"});
+  if(scroll) $("#request-form").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 function showFieldError(message,field){
+  const error=$("#form-error");
+  error.textContent=message;
+  error.hidden=false;
+  if(field) field.classList.add("field-error");
   showToast(message);
-  field?.focus();
+  if(field) field.focus();
   return false;
 }
 
-function validateStep(){
-  if(currentStep===1 && !$("[data-type].selected")) return showFieldError("Escolha um tipo de serviço para continuar.",$("[data-type]"));
-  if(currentStep===2){
-    if(!$("[name=description]").value.trim()) return showFieldError("Descreva rapidamente o problema para continuar.",$("[name=description]"));
+function validateStep(step){
+  const form=$("#request-form");
+  clearFormError();
+  if(step===1 && !$("[data-type].selected",form)) return showFieldError("Escolha um tipo de serviço para continuar.",$("[data-type]",form));
+  if(step===2){
+    if(!$("[name=description]",form).value.trim()) return showFieldError("Preencha a descrição do problema para continuar.",$("[name=description]",form));
     if(!selectedUrgency) return showFieldError("Escolha a urgência para continuar.",$("[data-urgency]"));
-    if(selectedUrgency==="Agendar" && !$("[name=schedule]").value) return showFieldError("Informe a data e o horário do agendamento.",$("[name=schedule]"));
+    if(selectedUrgency==="Agendar" && !$("[name=schedule]",form).value) return showFieldError("Informe a data e o horário do agendamento.",$("[name=schedule]",form));
   }
-  if(currentStep===3){
+  if(step===3){
     const fields={address:"endereço",number:"número",neighborhood:"bairro",city:"cidade"};
-    for(const [name,label] of Object.entries(fields)){const field=$(`[name=${name}]`);if(!field.value.trim()) return showFieldError(`Informe o campo ${label} para continuar.`,field);}
+    for(const [name,label] of Object.entries(fields)){const field=$(`[name=${name}]`,form);if(!field.value.trim()) return showFieldError(`Preencha o campo ${label} para continuar.`,field);}
   }
-  if(currentStep===4){
-    if(!$("[name=name]").value.trim()) return showFieldError("Informe seu nome para confirmar a solicitação.",$("[name=name]"));
-    if(!$("[name=whatsapp]").value.trim()) return showFieldError("Informe seu WhatsApp para confirmar a solicitação.",$("[name=whatsapp]"));
-    if(!$("[name=terms]").checked) return showFieldError("Aceite os termos para confirmar a solicitação.",$("[name=terms]"));
+  if(step===4){
+    if(!$("[name=name]",form).value.trim()) return showFieldError("Preencha seu nome para confirmar a solicitação.",$("[name=name]",form));
+    if(!$("[name=whatsapp]",form).value.trim()) return showFieldError("Preencha seu WhatsApp para confirmar a solicitação.",$("[name=whatsapp]",form));
+    if(!$("[name=terms]",form).checked) return showFieldError("Aceite os termos para confirmar a solicitação.",$("[name=terms]",form));
   }
   return true;
 }
@@ -141,7 +157,7 @@ function generateProtocol(){
 function submitRequest(event){
   event.preventDefault();
   const form=event.currentTarget;
-  if(!validateStep()) return;
+  if(!validateStep(4)) return;
   if(!form.checkValidity()){form.reportValidity();showToast("Revise os campos obrigatórios destacados.");return;}
   const data=Object.fromEntries(new FormData(form).entries());
   delete data.photo;
@@ -211,8 +227,12 @@ function bindEvents(){
     if(item&&event.target.closest(".assign-provider")){const name=$(".provider-select",item).value;if(!name){showToast("Selecione um prestador.");return;}updateRequest(item.dataset.protocol,r=>{r.provider=providers.find(p=>p.name===name);if(r.statusIndex<2){r.statusIndex=2;r.status=statuses[2];}});showToast("Prestador designado.");}
     if(item&&event.target.closest(".next-status")){updateRequest(item.dataset.protocol,r=>{r.statusIndex=Math.min(6,r.statusIndex+1);r.status=statuses[r.statusIndex];});showToast("Status atualizado.");}
   });
-  $("#next-step").addEventListener("click",()=>{if(validateStep()&&currentStep<4){currentStep++;updateSteps();}});
-  $("#prev-step").addEventListener("click",()=>{if(currentStep>1){currentStep--;updateSteps();}});
+  $("#next-step").addEventListener("click",()=>{
+    if(currentStep<4&&validateStep(currentStep)) showStep(currentStep+1);
+  });
+  $("#prev-step").addEventListener("click",()=>{
+    if(currentStep>1) showStep(currentStep-1);
+  });
   $("#request-form").addEventListener("submit",submitRequest);
   $("#get-location").addEventListener("click",()=>{
     const status=$("#location-status");

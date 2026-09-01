@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#092b4c">
   <meta name="description" content="Serviços de reforma e manutenção com atendimento rápido.">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=3">
   <title>Reforma Profissional</title>
 </head>
 <body>
@@ -77,6 +77,7 @@
         <fieldset class="form-step" data-step="2"><legend>Conte um pouco mais</legend><label>Descrição rápida do problema<textarea name="description" required rows="4" placeholder="Ex.: Minha torneira está vazando desde ontem..."></textarea></label><label>Foto opcional do local/problema<input type="file" name="photo" accept="image/*"><small>A foto é somente para visualização local e não será salva neste MVP.</small></label><label>Qual a urgência?</label><div class="choice-grid urgency" id="urgency-options"></div><div id="schedule-field" hidden><label>Data e horário<input type="datetime-local" name="schedule"></label></div></fieldset>
         <fieldset class="form-step" data-step="3"><legend>Onde será o atendimento?</legend><button type="button" class="btn btn-location" id="get-location">◎ Usar minha localização</button><p id="location-status" class="location-status">Ou informe o endereço manualmente.</p><input type="hidden" name="latitude"><input type="hidden" name="longitude"><div class="form-grid"><label class="wide">Endereço<input name="address" required autocomplete="street-address" placeholder="Rua, avenida..."></label><label>Número<input name="number" required inputmode="numeric" placeholder="123"></label><label>Complemento<input name="complement" placeholder="Apto, bloco..."></label><label>Bairro<input name="neighborhood" required placeholder="Seu bairro"></label><label>Cidade<input name="city" required placeholder="Sua cidade"></label><label class="wide">Referência<input name="reference" placeholder="Próximo a..."></label></div></fieldset>
         <fieldset class="form-step" data-step="4"><legend>Seus dados</legend><label>Nome completo<input name="name" required autocomplete="name" placeholder="Como podemos chamar você?"></label><label>WhatsApp<input name="whatsapp" required autocomplete="tel" inputmode="tel" placeholder="(31) 99999-9999"></label><label class="check"><input type="checkbox" name="terms" required><span>Aceito os termos de uso e autorizo o contato sobre este atendimento.</span></label></fieldset>
+        <p id="form-error" class="form-error" role="alert" aria-live="assertive" hidden></p>
         <div class="form-actions"><button type="button" class="btn btn-light" id="prev-step" hidden>Voltar</button><button type="button" class="btn btn-primary" id="next-step">Continuar →</button><button type="submit" class="btn btn-primary" id="submit-request" hidden>Confirmar Solicitação ✓</button></div>
       </form>
     </section>
@@ -104,6 +105,6 @@
   </main>
   <footer><div class="brand"><span class="brand-mark">RP</span><span>Reforma <b>Profissional</b></span></div><p>Reforma, manutenção e assistência com segurança.</p><a class="footer-phone" href="tel:+553125102500">Atendimento: (31) 2510-2500</a><button class="nav-link admin-link" data-view="admin">Painel Admin</button><small>© <span id="year"></span> Reforma Profissional.</small></footer>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js" defer></script>
+  <script src="app.js?v=3" defer></script>
 </body>
 </html>
