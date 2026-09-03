@@ -196,6 +196,21 @@ function renderTracking(){
   $("#provider-datetime").textContent=eta.toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
   $("#provider-whatsapp").href=whatsappUrl(`Olá, você foi designado para um atendimento da Reforma Profissional. Protocolo: ${request.protocol}`);
   $("#notifications-list").innerHTML=statuses.slice(0,request.statusIndex+1).reverse().map((status,index)=>`<div class="notification-item"><i>✓</i><div><b>${status}</b><small>${index===0?' • atualização mais recente':''}</small></div></div>`).join("");
+  renderPayment(request);
+  const warrantyPeriod=$("#warranty-period");
+  warrantyPeriod.hidden=!request.warranty;
+  if(request.warranty) warrantyPeriod.textContent=`Serviço concluído em ${new Date(request.warranty.completedAt).toLocaleDateString("pt-BR")}. Garantia prevista até ${new Date(request.warranty.warrantyEnd).toLocaleDateString("pt-BR")}.`;
+}
+
+function renderPayment(request){
+  const panel=$("#payment-panel");
+  panel.hidden=!(request.quote?.status==="APPROVED");
+  if(panel.hidden) return;
+  const methods=PaymentRules.createPaymentMethods(request.quote.value);
+  $("#pix-value").textContent=PaymentRules.formatCurrency(methods.pix.amount);
+  $("#debit-value").textContent=PaymentRules.formatCurrency(methods.debit.amount);
+  $("#installment-options").innerHTML=methods.credit.map(option=>`<button type="button" class="installment-option" data-payment-total="${option.total}"><span>${escapeHtml(option.displayText)}</span><small>Total ${PaymentRules.formatCurrency(option.total)}</small></button>`).join("");
+  $("#selected-payment-total").textContent=PaymentRules.formatCurrency(methods.credit[0].total);
 }
 
 function renderAdmin(){
@@ -206,7 +221,7 @@ function renderAdmin(){
   $("#metric-done").textContent=requests.filter(item=>item.statusIndex===6).length;
   $("#admin-list").innerHTML=requests.length?requests.map(request=>{
     const providerOptions=`<option value="">Selecionar prestador</option>`+providers.map(p=>`<option value="${p.name}" ${request.provider?.name===p.name?'selected':''}>${p.name} — ${p.specialty} — ${p.rating}</option>`).join("");
-    return `<article class="admin-item" data-protocol="${request.protocol}"><div class="admin-item-head"><div><h3>${escapeHtml(request.name)}</h3><small>${escapeHtml(request.protocol)}</small></div><span class="status-pill">${escapeHtml(request.status)}</span></div><div class="admin-meta"><span>Serviço<b>${escapeHtml(request.service)}</b></span><span>WhatsApp<b>${escapeHtml(request.whatsapp)}</b></span><span>Urgência<b>${escapeHtml(request.urgency)}</b></span><span>Local<b>${escapeHtml(request.address)}, ${escapeHtml(request.number)} • ${escapeHtml(request.neighborhood)}</b></span><span>Prestador<b>${escapeHtml(request.provider?.name||"Não designado")}</b></span></div><div class="admin-actions"><select class="provider-select" aria-label="Selecionar prestador">${providerOptions}</select><button class="btn btn-light assign-provider">Designar prestador</button><button class="btn btn-light next-status">Alterar status →</button><a class="btn btn-whatsapp" href="https://wa.me/${String(request.whatsapp).replace(/\D/g,'')}?text=${encodeURIComponent(`Olá ${request.name}, falamos da Reforma Profissional sobre o protocolo ${request.protocol}.`)}" target="_blank" rel="noopener">Chamar cliente</a></div></article>`;
+    return `<article class="admin-item" data-protocol="${request.protocol}"><div class="admin-item-head"><div><h3>${escapeHtml(request.name)}</h3><small>${escapeHtml(request.protocol)}</small></div><span class="status-pill">${escapeHtml(request.status)}</span></div><div class="admin-meta"><span>Serviço<b>${escapeHtml(request.service)}</b></span><span>WhatsApp<b>${escapeHtml(request.whatsapp)}</b></span><span>Urgência<b>${escapeHtml(request.urgency)}</b></span><span>Local<b>${escapeHtml(request.address)}, ${escapeHtml(request.number)} • ${escapeHtml(request.neighborhood)}</b></span><span>Prestador<b>${escapeHtml(request.provider?.name||"Não designado")}</b></span><span>Orçamento<b>${request.quote ? `${PaymentRules.formatCurrency(request.quote.value)} • ${request.quote.status}` : "Aguardando"}</b></span></div><div class="admin-actions"><select class="provider-select" aria-label="Selecionar prestador">${providerOptions}</select><button class="btn btn-light assign-provider">Designar prestador</button><input class="quote-value" type="number" min="0.01" step="0.01" value="${request.quote?.value||''}" placeholder="Valor do orçamento" aria-label="Valor do orçamento"><button class="btn btn-light approve-quote">Aprovar orçamento</button><button class="btn btn-light mark-paid" ${request.quote?.status!=="APPROVED"?'disabled':''}>Marcar como pago</button><button class="btn btn-light next-status">Alterar status →</button><a class="btn btn-whatsapp" href="https://wa.me/${String(request.whatsapp).replace(/\D/g,'')}?text=${encodeURIComponent(`Olá ${request.name}, falamos da Reforma Profissional sobre o protocolo ${request.protocol}.`)}" target="_blank" rel="noopener">Chamar cliente</a></div></article>`;
   }).join(""):`<div class="empty-state"><h3>Nenhuma solicitação registrada</h3><p>As novas solicitações aparecerão aqui.</p></div>`;
 }
 
@@ -225,7 +240,11 @@ function bindEvents(){
     const assistant=event.target.closest("[data-assistant]"); if(assistant){assistantSelection=assistantData[assistant.dataset.assistant];$("#assistant-answer p").textContent=assistantSelection[1];$("#assistant-answer").hidden=false;return;}
     const item=event.target.closest(".admin-item");
     if(item&&event.target.closest(".assign-provider")){const name=$(".provider-select",item).value;if(!name){showToast("Selecione um prestador.");return;}updateRequest(item.dataset.protocol,r=>{r.provider=providers.find(p=>p.name===name);if(r.statusIndex<2){r.statusIndex=2;r.status=statuses[2];}});showToast("Prestador designado.");}
-    if(item&&event.target.closest(".next-status")){updateRequest(item.dataset.protocol,r=>{r.statusIndex=Math.min(6,r.statusIndex+1);r.status=statuses[r.statusIndex];});showToast("Status atualizado.");}
+    if(item&&event.target.closest(".approve-quote")){const value=Number($(".quote-value",item).value);try{PaymentRules.createPaymentMethods(value);}catch{showToast("Informe um valor de orçamento válido.");return;}updateRequest(item.dataset.protocol,r=>{r.quote={value,status:"APPROVED",approvedAt:new Date().toISOString()};});showToast("Orçamento aprovado e pagamento liberado.");}
+    if(item&&event.target.closest(".mark-paid")){updateRequest(item.dataset.protocol,r=>{r.paymentStatus="PAID";});showToast("Pagamento confirmado.");}
+    if(item&&event.target.closest(".next-status")){updateRequest(item.dataset.protocol,r=>{r.statusIndex=Math.min(6,r.statusIndex+1);r.status=statuses[r.statusIndex];if(r.statusIndex===6&&!r.warranty){r.serviceStatus="COMPLETED";r.completedAt=new Date().toISOString();r.warranty=BusinessRules.calculateWarrantyEnd(r.completedAt);if(r.paymentStatus==="PAID"&&r.quote)r.cashback=BusinessRules.createCashbackRecord({value:r.quote.value*.02,origin:"SERVICE",serviceId:r.protocol,paymentStatus:r.paymentStatus,serviceStatus:r.serviceStatus});}});showToast("Status atualizado.");}
+    const paymentOption=event.target.closest(".installment-option");
+    if(paymentOption) $("#selected-payment-total").textContent=PaymentRules.formatCurrency(Number(paymentOption.dataset.paymentTotal));
   });
   $("#next-step").addEventListener("click",()=>{
     if(currentStep<4&&validateStep(currentStep)) showStep(currentStep+1);

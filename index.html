@@ -92,6 +92,8 @@
         <div class="tracking-layout"><div>
           <div class="map-placeholder"><div class="map-lines"></div><div class="map-pin">⌂</div><div class="provider-pin">●</div><div class="map-label"><b>Mapa em tempo real em breve</b><span id="map-address"></span><small id="map-status"></small></div></div>
           <div class="status-card"><h2>Status do atendimento</h2><ol class="status-timeline" id="status-timeline"></ol></div>
+          <section id="payment-panel" class="payment-panel" hidden><span class="eyebrow">PAGAMENTO</span><h2>Forma de pagamento</h2><p>Escolha uma opção para o orçamento aprovado.</p><div class="payment-method"><h3>PIX</h3><strong id="pix-value"></strong><small>Pagamento demonstrativo, aguardando integração com o gateway.</small></div><div class="payment-method"><h3>Cartão de débito</h3><strong id="debit-value"></strong><small>Pagamento seguro será processado pelo futuro gateway. Nenhum dado de cartão é armazenado.</small></div><div class="payment-method"><h3>Cartão de crédito</h3><div id="installment-options" class="installment-options"></div></div><div class="payment-total">Total da opção selecionada: <strong id="selected-payment-total"></strong></div></section>
+          <section id="warranty-panel" class="warranty-panel"><h2>Garantia Reforma Profissional</h2><p>Até 90 dias de garantia conforme o serviço e regras aplicáveis.</p><small>Serviços negociados diretamente com o prestador, fora do chamado oficial, não recebem a garantia adicional e acompanhamento da Reforma Profissional, sem prejuízo dos direitos legais do consumidor.</small><p id="warranty-period" hidden></p></section>
         </div><aside class="provider-card"><div class="provider-head"><div class="avatar" id="provider-avatar">JT</div><div><small>SEU PROFISSIONAL</small><h2 id="provider-name">João Técnico</h2><p id="provider-specialty">Marido de aluguel</p></div><span class="rating" id="provider-rating">★ 4.9</span></div><div class="provider-stats"><span><b id="provider-jobs">328</b> atendimentos</span><span><b id="provider-experience">8 anos</b> experiência</span></div><div class="eta"><span>Previsão de chegada</span><strong id="provider-eta">25 minutos</strong><small id="provider-datetime"></small></div><a class="btn btn-whatsapp" id="provider-whatsapp" target="_blank" rel="noopener">💬 Falar com o prestador</a><button class="btn btn-light" id="share-tracking">↗ Compartilhar acompanhamento</button></aside></div>
         <div class="notifications"><h2>Atualizações</h2><div id="notifications-list"></div><small><!-- Futuro: integrar Web Push/Push API e backend para notificações reais. -->As notificações push estarão disponíveis em uma próxima versão.</small></div>
       </div>
@@ -105,6 +107,8 @@
   </main>
   <footer><div class="brand"><span class="brand-mark">RP</span><span>Reforma <b>Profissional</b></span></div><p>Reforma, manutenção e assistência com segurança.</p><a class="footer-phone" href="tel:+553125102500">Atendimento: (31) 2510-2500</a><button class="nav-link admin-link" data-view="admin">Painel Admin</button><small>© <span id="year"></span> Reforma Profissional.</small></footer>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=3" defer></script>
+  <script src="payments.js?v=1" defer></script>
+  <script src="business-rules.js?v=1" defer></script>
+  <script src="app.js?v=4" defer></script>
 </body>
 </html>

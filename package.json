@@ -1,0 +1,5 @@
+{
+  "name": "reforma-profissional",
+  "private": true,
+  "scripts": { "test": "node --test" }
+}
