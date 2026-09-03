@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Reforma Profissional</title>
+  <defs>
+    <linearGradient id="background" x1="48" y1="32" x2="464" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0d416c"/>
+      <stop offset="1" stop-color="#061f38"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#background)"/>
+  <!-- A marca fica dentro da zona segura central de 80% exigida por ícones maskable. -->
+  <path d="M154 251 256 164l102 87v104a19 19 0 0 1-19 19H173a19 19 0 0 1-19-19Z" fill="#fff"/>
+  <path d="m137 251 119-102 119 102" fill="none" stroke="#27c2a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="25"/>
+  <path d="M197 354V252h65c37 0 58 19 58 51 0 19-10 34-27 43l27 8h-59l-19-32h-18v32Zm45-59h20c9 0 15-4 15-12s-6-11-15-11h-20Z" fill="#082c4c"/>
+</svg>

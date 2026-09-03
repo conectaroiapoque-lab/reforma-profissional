@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Reforma Profissional</title>
+  <defs>
+    <linearGradient id="background" x1="64" y1="43" x2="448" y2="469" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0d416c"/>
+      <stop offset="1" stop-color="#061f38"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="102" fill="url(#background)"/>
+  <path d="M112 243 256 120l144 123v147a27 27 0 0 1-27 27H139a27 27 0 0 1-27-27Z" fill="#fff"/>
+  <path d="m88 243 168-144 168 144" fill="none" stroke="#27c2a3" stroke-linecap="round" stroke-linejoin="round" stroke-width="35"/>
+  <path d="M173 389V245h91c53 0 82 27 82 72 0 27-13 48-37 61l37 11h-83l-27-45h-26v45Zm64-83h27c13 0 21-6 21-17s-8-16-21-16h-27Z" fill="#082c4c"/>
+</svg>
