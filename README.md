@@ -11,6 +11,8 @@ MVP mobile first de um site/app PWA para solicitar e acompanhar serviços de ref
 - Assistente inteligente simulado para direcionamento do serviço.
 - Mensagens prontas para cliente, acompanhamento e prestador via WhatsApp.
 - Painel administrativo local para designar prestadores e avançar status.
+- Cadastro público do prestador em quatro etapas, aceite versionado e aprovação administrativa.
+- Termos separados e legíveis para clientes e prestadores independentes.
 - PWA instalável com cache do app shell e experiência offline simples.
 - Interface responsiva, sem imagens ou fontes externas obrigatórias.
 
@@ -21,6 +23,7 @@ MVP mobile first de um site/app PWA para solicitar e acompanhar serviços de ref
 - `index.html`: estrutura e conteúdo acessível das telas.
 - `styles.css`: design system, layout mobile first e responsividade.
 - `app.js`: fluxo, geolocalização, dados simulados, WhatsApp e administração.
+- `provider.js`: regras de cadastro, termos versionados, privacidade de perfis e status de aprovação.
 - `manifest.webmanifest`: metadados do PWA, sem ícones binários nesta versão.
 - `sw.js`: cache básico e fallback offline.
 
@@ -49,6 +52,14 @@ Também é possível usar a CLI (`vercel` e depois `vercel --prod`), mas ela é 
 O atendimento central é pelo telefone **(31) 2510-2500**. O botão de WhatsApp usa o número `553125102500`, configurado na constante `WHATSAPP_NUMBER`, no início de `app.js`, e abre a conversa com a mensagem: “Olá, vim pelo app Reforma Profissional e quero solicitar um serviço.”
 
 ## Próximos passos para produção
+
+### Limites do cadastro de prestadores
+
+- O conteúdo dos documentos selecionados **não é persistido**; somente os nomes dos arquivos são registrados no navegador para demonstrar o fluxo.
+- `localStorage` não é armazenamento seguro para documentos, contratos ou dados cadastrais de produção.
+- Backend, banco de dados, storage privado, autenticação, permissões, trilha auditável, captura confiável de IP/user agent e assinatura eletrônica ainda precisam ser implementados.
+- Os termos e o fluxo configurável de documento fiscal são preliminares e precisam de revisão jurídica, contábil e tributária antes do uso em produção.
+- Uma nova versão dos termos deve usar um novo identificador e exigir novo aceite; registros anteriores não devem ser sobrescritos silenciosamente.
 
 1. **Banco de dados:** adotar uma API e banco como PostgreSQL/Supabase para sincronização, auditoria e histórico.
 2. **Login e perfis:** autenticar clientes, prestadores e administradores, com permissões e verificação de identidade.
