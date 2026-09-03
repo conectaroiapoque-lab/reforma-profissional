@@ -1,5 +1,17 @@
-const CACHE_NAME = "reforma-profissional-v5";
-const APP_SHELL = ["./", "./index.html", "./styles.css?v=3", "./payments.js?v=1", "./business-rules.js?v=1", "./provider.js?v=1", "./app.js?v=5", "./manifest.webmanifest"];
+const CACHE_NAME = "reforma-profissional-v6";
+const APP_SHELL = [
+  "./",
+  "./index.html",
+  "./styles.css?v=3",
+  "./payments.js?v=1",
+  "./business-rules.js?v=1",
+  "./provider.js?v=1",
+  "./app.js?v=5",
+  "./manifest.webmanifest",
+  "./icons/icon-192.svg",
+  "./icons/icon-512.svg",
+  "./icons/icon-maskable-512.svg"
+];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));

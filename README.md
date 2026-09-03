@@ -24,7 +24,8 @@ MVP mobile first de um site/app PWA para solicitar e acompanhar serviços de ref
 - `styles.css`: design system, layout mobile first e responsividade.
 - `app.js`: fluxo, geolocalização, dados simulados, WhatsApp e administração.
 - `provider.js`: regras de cadastro, termos versionados, privacidade de perfis e status de aprovação.
-- `manifest.webmanifest`: metadados do PWA, sem ícones binários nesta versão.
+- `manifest.webmanifest`: metadados do PWA e ícones vetoriais instaláveis.
+- `icons/`: ícones SVG textuais equivalentes aos tamanhos 192, 512 e 512 maskable; mantêm o PR livre de arquivos binários.
 - `sw.js`: cache básico e fallback offline.
 
 ## Como testar localmente
@@ -36,6 +37,17 @@ python3 -m http.server 8000
 ```
 
 Acesse `http://localhost:8000`. Teste o catálogo, envie uma solicitação, abra **Acompanhar Serviço** e use **Painel Admin** para designar um prestador e alterar o status. No DevTools, use o modo responsivo e a aba *Application* para verificar manifest, service worker, cache e `localStorage`.
+
+### Ícones e entrega por pull request
+
+Os três ícones do manifest são SVGs textuais versionáveis, sem conteúdo base64. O
+formato vetorial permite declarar `sizes: "any"`; há duas opções de uso comum e
+uma opção `maskable`, cuja marca respeita a zona segura central. Assim, o pacote
+mantém os equivalentes de 192 px, 512 px e 512 px maskable sem anexar PNGs ao PR.
+
+Para criar um PR, inclua normalmente `icons/*.svg`, `manifest.webmanifest` e
+`sw.js` no commit. Nenhuma etapa de conversão ou upload binário é necessária, e
+os caminhos publicados no manifest não devem ser alterados para `.png`.
 
 ## Publicação na Vercel
 
@@ -68,4 +80,4 @@ O atendimento central é pelo telefone **(31) 2510-2500**. O botão de WhatsApp 
 5. **Push:** implementar Web Push com consentimento, chaves VAPID e eventos gerados pelo backend.
 6. **Operação:** criar disponibilidade, área de cobertura, preços/orçamentos, agenda, avaliações e canais de suporte.
 7. **Segurança e privacidade:** termos jurídicos, LGPD, criptografia, retenção de dados, logs e proteção contra abuso.
-8. **PWA completo:** adicionar ícones próprios em múltiplos tamanhos, atalhos e screenshots quando os ativos visuais forem aprovados.
+8. **PWA completo:** os ícones vetoriais atuais atendem ao manifest sem arquivos binários; atalhos e screenshots podem ser adicionados quando os ativos visuais forem aprovados.

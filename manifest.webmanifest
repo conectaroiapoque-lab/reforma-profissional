@@ -10,5 +10,24 @@
   "theme_color": "#082c4c",
   "orientation": "portrait-primary",
   "categories": ["business", "utilities", "lifestyle"],
-  "icons": []
+  "icons": [
+    {
+      "src": "./icons/icon-192.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-maskable-512.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
 }
