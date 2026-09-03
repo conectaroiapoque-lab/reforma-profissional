@@ -11,11 +11,11 @@ const constructionServices = ["Reforma de banheiro","Reforma de cozinha","Reform
 const serviceTypes = ["Elétrica","Hidráulica","Pintura","Montagem","Instalação","Reparo urgente","Reforma","Outro"];
 const urgencies = ["Agora","Hoje","Amanhã","Agendar"];
 const statuses = ["Solicitação recebida","Buscando profissional","Profissional designado","Profissional a caminho","Chegou ao local","Serviço em andamento","Serviço finalizado"];
-const providers = [
-  {name:"João Técnico",specialty:"Marido de aluguel",rating:"4.9",jobs:328,experience:"8 anos",initials:"JT"},
-  {name:"Carlos Eletricista",specialty:"Elétrica",rating:"4.8",jobs:241,experience:"7 anos",initials:"CE"},
-  {name:"Marcelo Hidráulico",specialty:"Hidráulica",rating:"4.9",jobs:296,experience:"9 anos",initials:"MH"},
-  {name:"Paulo Pintor",specialty:"Pintura",rating:"4.7",jobs:184,experience:"6 anos",initials:"PP"}
+const demoProviders = [
+  {name:"João Técnico",specialty:"Marido de aluguel",rating:"4.9",jobs:328,experience:"8 anos",initials:"JT",rank:"Diamante",status:"APROVADO"},
+  {name:"Carlos Eletricista",specialty:"Elétrica",rating:"4.8",jobs:241,experience:"7 anos",initials:"CE",rank:"Ouro",status:"APROVADO"},
+  {name:"Marcelo Hidráulico",specialty:"Hidráulica",rating:"4.9",jobs:296,experience:"9 anos",initials:"MH",rank:"Diamante",status:"APROVADO"},
+  {name:"Paulo Pintor",specialty:"Pintura",rating:"4.7",jobs:184,experience:"6 anos",initials:"PP",rank:"Prata",status:"APROVADO"}
 ];
 const assistantData = {
   "Minha tomada não funciona":["Elétrica","Parece ser um serviço elétrico. Um eletricista pode verificar a tomada e a rede com segurança."],
@@ -162,7 +162,7 @@ function submitRequest(event){
   const data=Object.fromEntries(new FormData(form).entries());
   delete data.photo;
   const protocol=generateProtocol();
-  const request={...data,protocol,service:selectedService||$("[data-type].selected").dataset.type,type:$("[data-type].selected").dataset.type,urgency:selectedUrgency,status:statuses[0],statusIndex:0,provider:null,createdAt:new Date().toISOString()};
+  const request={...data,protocol,service:selectedService||$("[data-type].selected").dataset.type,type:$("[data-type].selected").dataset.type,urgency:selectedUrgency,status:statuses[0],statusIndex:0,provider:null,clientTermsAcceptance:{termsVersion:ProviderRules.CLIENT_TERMS_VERSION,acceptedAt:new Date().toISOString(),protocol,auditSource:"LOCAL_MVP"},createdAt:new Date().toISOString()};
   const requests=getRequests(); requests.unshift(request); saveRequests(requests);
   localStorage.setItem(CURRENT_KEY,protocol);
   $("#success-protocol").textContent=protocol;
@@ -185,7 +185,7 @@ function renderTracking(){
   $("#map-address").textContent=`${request.address}, ${request.number} • ${request.neighborhood}`;
   $("#map-status").textContent=request.status;
   $("#status-timeline").innerHTML=statuses.map((status,index)=>`<li class="${index<request.statusIndex?'done':index===request.statusIndex?'current':''}">${status}</li>`).join("");
-  const provider=request.provider||providers[0];
+  const provider=request.provider||demoProviders[0];
   $("#provider-avatar").textContent=provider.initials;
   $("#provider-name").textContent=provider.name;
   $("#provider-specialty").textContent=provider.specialty;
@@ -215,6 +215,8 @@ function renderPayment(request){
 
 function renderAdmin(){
   const requests=getRequests();
+  const registeredProviders=getRegisteredProviders();
+  const providers=getAssignableProviders();
   $("#metric-total").textContent=requests.length;
   $("#metric-new").textContent=requests.filter(item=>item.statusIndex<2).length;
   $("#metric-progress").textContent=requests.filter(item=>item.statusIndex>=2&&item.statusIndex<6).length;
@@ -223,6 +225,22 @@ function renderAdmin(){
     const providerOptions=`<option value="">Selecionar prestador</option>`+providers.map(p=>`<option value="${p.name}" ${request.provider?.name===p.name?'selected':''}>${p.name} — ${p.specialty} — ${p.rating}</option>`).join("");
     return `<article class="admin-item" data-protocol="${request.protocol}"><div class="admin-item-head"><div><h3>${escapeHtml(request.name)}</h3><small>${escapeHtml(request.protocol)}</small></div><span class="status-pill">${escapeHtml(request.status)}</span></div><div class="admin-meta"><span>Serviço<b>${escapeHtml(request.service)}</b></span><span>WhatsApp<b>${escapeHtml(request.whatsapp)}</b></span><span>Urgência<b>${escapeHtml(request.urgency)}</b></span><span>Local<b>${escapeHtml(request.address)}, ${escapeHtml(request.number)} • ${escapeHtml(request.neighborhood)}</b></span><span>Prestador<b>${escapeHtml(request.provider?.name||"Não designado")}</b></span><span>Orçamento<b>${request.quote ? `${PaymentRules.formatCurrency(request.quote.value)} • ${request.quote.status}` : "Aguardando"}</b></span></div><div class="admin-actions"><select class="provider-select" aria-label="Selecionar prestador">${providerOptions}</select><button class="btn btn-light assign-provider">Designar prestador</button><input class="quote-value" type="number" min="0.01" step="0.01" value="${request.quote?.value||''}" placeholder="Valor do orçamento" aria-label="Valor do orçamento"><button class="btn btn-light approve-quote">Aprovar orçamento</button><button class="btn btn-light mark-paid" ${request.quote?.status!=="APPROVED"?'disabled':''}>Marcar como pago</button><button class="btn btn-light next-status">Alterar status →</button><a class="btn btn-whatsapp" href="https://wa.me/${String(request.whatsapp).replace(/\D/g,'')}?text=${encodeURIComponent(`Olá ${request.name}, falamos da Reforma Profissional sobre o protocolo ${request.protocol}.`)}" target="_blank" rel="noopener">Chamar cliente</a></div></article>`;
   }).join(""):`<div class="empty-state"><h3>Nenhuma solicitação registrada</h3><p>As novas solicitações aparecerão aqui.</p></div>`;
+  $("#provider-admin-list").innerHTML=registeredProviders.length?registeredProviders.map(provider=>`<article class="admin-item provider-admin-item" data-provider-id="${escapeHtml(provider.providerId)}"><div class="admin-item-head"><div><h3>${escapeHtml(provider.fullName)}</h3><small>${escapeHtml(provider.professionalName)}</small></div><span class="status-pill">${escapeHtml(provider.status)}</span></div><div class="admin-meta"><span>Especialidade<b>${escapeHtml(provider.specialties.join(", "))}</b></span><span>CNPJ<b>${escapeHtml(provider.cnpj||"Não informado")}</b></span><span>Cidade<b>${escapeHtml(provider.city)}</b></span><span>Documentos<b>${Object.values(provider.documents||{}).flat().length} selecionado(s)</b></span><span>Termo aceito<b>${provider.acceptance?'SIM':'NÃO'}</b></span><span>Versão<b>${escapeHtml(provider.acceptance?.termsVersion||"—")}</b></span><span>Data de aceite<b>${provider.acceptance?new Date(provider.acceptance.acceptedAt).toLocaleString("pt-BR"):"—"}</b></span><span>Avaliação / nível<b>${escapeHtml(provider.rating||"Novo")} • ${escapeHtml(provider.rank||"Bronze")}</b></span></div><details><summary>Histórico de status</summary>${(provider.statusHistory||[]).map(item=>`<p>${escapeHtml(item.from)} → ${escapeHtml(item.to)} • ${new Date(item.at).toLocaleString("pt-BR")}</p>`).join("")}</details><div class="admin-actions">${providerActionButtons(provider)}</div></article>`).join(""):`<div class="empty-state"><h3>Nenhum prestador cadastrado</h3><p>Os cadastros públicos aparecerão aqui.</p></div>`;
+}
+
+function getRegisteredProviders(){try{return JSON.parse(localStorage.getItem(ProviderRules.PROVIDER_STORAGE_KEY))||[];}catch{return[];}}
+function getAssignableProviders(){return [...demoProviders.filter(ProviderRules.canReceiveServices),...getRegisteredProviders().filter(ProviderRules.canReceiveServices).map(provider=>({name:provider.professionalName||provider.fullName,specialty:provider.specialties.join(", "),rating:String(provider.rating||"Novo"),jobs:provider.completedServices||0,experience:`${provider.experienceYears} anos`,initials:(provider.professionalName||provider.fullName).split(/\s+/).slice(0,2).map(part=>part[0]).join("").toUpperCase(),providerId:provider.providerId,status:provider.status,rank:provider.rank}))];}
+function providerActionButtons(provider){
+  const actions=[];
+  if(["CADASTRO INICIADO","DOCUMENTOS PENDENTES","REPROVADO"].includes(provider.status)) actions.push(["EM ANÁLISE","Analisar"]);
+  if(provider.status==="EM ANÁLISE") actions.push(["APROVADO","Aprovar"],["REPROVADO","Reprovar"]);
+  if(provider.status==="APROVADO") actions.push(["SUSPENSO","Suspender"]);
+  if(provider.status==="SUSPENSO") actions.push(["APROVADO","Reativar"]);
+  return actions.map(([status,label])=>`<button class="btn btn-light provider-status-action" data-next-provider-status="${status}">${label}</button>`).join("")||"<small>Nenhuma ação disponível.</small>";
+}
+function updateProviderStatus(providerId,nextStatus){
+  const providers=getRegisteredProviders(); const index=providers.findIndex(provider=>provider.providerId===providerId); if(index<0)return;
+  providers[index]=ProviderRules.transitionStatus(providers[index],nextStatus); localStorage.setItem(ProviderRules.PROVIDER_STORAGE_KEY,JSON.stringify(providers)); renderAdmin();
 }
 
 function updateRequest(protocol, callback){
@@ -239,7 +257,10 @@ function bindEvents(){
     const urgency=event.target.closest("[data-urgency]"); if(urgency){selectedUrgency=urgency.dataset.urgency;$$('[data-urgency]').forEach(b=>b.classList.toggle('selected',b===urgency));$("#schedule-field").hidden=selectedUrgency!=="Agendar";return;}
     const assistant=event.target.closest("[data-assistant]"); if(assistant){assistantSelection=assistantData[assistant.dataset.assistant];$("#assistant-answer p").textContent=assistantSelection[1];$("#assistant-answer").hidden=false;return;}
     const item=event.target.closest(".admin-item");
-    if(item&&event.target.closest(".assign-provider")){const name=$(".provider-select",item).value;if(!name){showToast("Selecione um prestador.");return;}updateRequest(item.dataset.protocol,r=>{r.provider=providers.find(p=>p.name===name);if(r.statusIndex<2){r.statusIndex=2;r.status=statuses[2];}});showToast("Prestador designado.");}
+    const providerItem=event.target.closest(".provider-admin-item");
+    const providerStatusAction=event.target.closest(".provider-status-action");
+    if(providerItem&&providerStatusAction){updateProviderStatus(providerItem.dataset.providerId,providerStatusAction.dataset.nextProviderStatus);showToast("Status do prestador atualizado e registrado no histórico local.");return;}
+    if(item&&event.target.closest(".assign-provider")){const name=$(".provider-select",item).value;if(!name){showToast("Selecione um prestador.");return;}updateRequest(item.dataset.protocol,r=>{r.provider=getAssignableProviders().find(p=>p.name===name);if(r.statusIndex<2){r.statusIndex=2;r.status=statuses[2];}});showToast("Prestador designado.");}
     if(item&&event.target.closest(".approve-quote")){const value=Number($(".quote-value",item).value);try{PaymentRules.createPaymentMethods(value);}catch{showToast("Informe um valor de orçamento válido.");return;}updateRequest(item.dataset.protocol,r=>{r.quote={value,status:"APPROVED",approvedAt:new Date().toISOString()};});showToast("Orçamento aprovado e pagamento liberado.");}
     if(item&&event.target.closest(".mark-paid")){updateRequest(item.dataset.protocol,r=>{r.paymentStatus="PAID";});showToast("Pagamento confirmado.");}
     if(item&&event.target.closest(".next-status")){updateRequest(item.dataset.protocol,r=>{r.statusIndex=Math.min(6,r.statusIndex+1);r.status=statuses[r.statusIndex];if(r.statusIndex===6&&!r.warranty){r.serviceStatus="COMPLETED";r.completedAt=new Date().toISOString();r.warranty=BusinessRules.calculateWarrantyEnd(r.completedAt);if(r.paymentStatus==="PAID"&&r.quote)r.cashback=BusinessRules.createCashbackRecord({value:r.quote.value*.02,origin:"SERVICE",serviceId:r.protocol,paymentStatus:r.paymentStatus,serviceStatus:r.serviceStatus});}});showToast("Status atualizado.");}
