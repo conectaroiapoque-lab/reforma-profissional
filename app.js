@@ -41,6 +41,13 @@ const getRequests = () => { try { return JSON.parse(localStorage.getItem(STORAGE
 const saveRequests = requests => localStorage.setItem(STORAGE_KEY, JSON.stringify(requests));
 const showToast = message => { const toast=$("#toast"); toast.textContent=message; toast.classList.add("show"); setTimeout(()=>toast.classList.remove("show"),2600); };
 
+function trackWhatsappConversion(){
+  if(typeof window.gtag!=="function")return;
+  window.gtag("event","conversion",{
+    send_to:"AW-17424041657/Rb7QCI780u4cELmNt_RA"
+  });
+}
+
 function renderStaticContent(){
   const trust=["Profissionais verificados","Atendimento rápido","Segurança para o cliente","Orçamento transparente","Acompanhamento em tempo real","Suporte via WhatsApp"];
   const trustIcons=["✓","⚡","🛡️","▤","⌖","💬"];
@@ -250,6 +257,7 @@ function updateRequest(protocol, callback){
 
 function bindEvents(){
   document.addEventListener("click",event=>{
+    if(event.target.closest(".whatsapp-general"))trackWhatsappConversion();
     const viewButton=event.target.closest("[data-view]"); if(viewButton){showView(viewButton.dataset.view);return;}
     if(event.target.closest("[data-start]")){startRequest();return;}
     const service=event.target.closest("[data-service]"); if(service){startRequest(service.dataset.service);return;}
