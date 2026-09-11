@@ -59,6 +59,29 @@ os caminhos publicados no manifest não devem ser alterados para `.png`.
 
 Também é possível usar a CLI (`vercel` e depois `vercel --prod`), mas ela é opcional. Todos os caminhos são relativos e compatíveis com hospedagem estática.
 
+## Landing Pages Google Ads
+
+O projeto inclui seis destinos públicos, rápidos e mobile first para campanhas de
+Google Ads Search e seus sitelinks:
+
+- `/eletricista-bh/`
+- `/bombeiro-hidraulico-bh/`
+- `/ar-condicionado-bh/`
+- `/pedreiro-bh/`
+- `/marido-de-aluguel-bh/`
+- `/solicitar-servico/`
+
+As cinco páginas de especialidade têm conteúdo próprio alinhado à intenção de
+busca, aos serviços e ao CTA. A página `/solicitar-servico/` funciona como hub
+para essas especialidades e para o aplicativo principal. Todas usam metadados
+exclusivos, canonical, Open Graph, dados estruturados `Service`, conteúdo de SEO
+local para Belo Horizonte e Região Metropolitana e links internos.
+
+Os CTAs abrem o número central no WhatsApp com uma mensagem contextual. O script
+compartilhado `landing-pages.js` registra a conversão já configurada no Google Ads
+somente em um clique real nesses links; uma indisponibilidade da tag não bloqueia
+a abertura do WhatsApp. Não há evento de conversão no carregamento da página.
+
 ## Configuração rápida
 
 O atendimento central é pelo telefone **(31) 2510-2500**. O botão de WhatsApp usa o número `553125102500`, configurado na constante `WHATSAPP_NUMBER`, no início de `app.js`, e abre a conversa com a mensagem: “Olá, vim pelo app Reforma Profissional e quero solicitar um serviço.”

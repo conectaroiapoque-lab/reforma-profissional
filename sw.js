@@ -1,4 +1,4 @@
-const CACHE_NAME = "reforma-profissional-v6";
+const CACHE_NAME = "reforma-profissional-v7";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -7,6 +7,14 @@ const APP_SHELL = [
   "./business-rules.js?v=1",
   "./provider.js?v=1",
   "./app.js?v=5",
+  "./landing-pages.css?v=1",
+  "./landing-pages.js?v=1",
+  "./eletricista-bh/",
+  "./bombeiro-hidraulico-bh/",
+  "./ar-condicionado-bh/",
+  "./pedreiro-bh/",
+  "./marido-de-aluguel-bh/",
+  "./solicitar-servico/",
   "./manifest.webmanifest",
   "./icons/icon-192.svg",
   "./icons/icon-512.svg",
