@@ -84,7 +84,7 @@ a abertura do WhatsApp. Não há evento de conversão no carregamento da página
 
 ## Configuração rápida
 
-O atendimento central é pelo telefone **(31) 2510-2500**. O botão de WhatsApp usa o número `553125102500`, configurado na constante `WHATSAPP_NUMBER`, no início de `app.js`, e abre a conversa com a mensagem: “Olá, vim pelo app Reforma Profissional e quero solicitar um serviço.”
+O telefone fixo para ligações é **(31) 2510-2500**. Os botões de WhatsApp usam o número Business `5531990102500`, configurado na constante `WHATSAPP_NUMBER`, no início de `app.js`, e abrem a conversa com a mensagem: “Olá, vim pelo app Reforma Profissional e quero solicitar um serviço.”
 
 ## Próximos passos para produção
 

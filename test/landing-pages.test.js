@@ -26,7 +26,7 @@ test("as seis landing pages existem e possuem SEO individual", () => {
 
 test("CTAs usam WhatsApp oficial e todas as rotas internas", () => {
   for (const { source } of pages) {
-    assert.match(source, /https:\/\/wa\.me\/553125102500\?text=/);
+    assert.match(source, /https:\/\/wa\.me\/5531990102500\?text=/);
     assert.match(source, /data-whatsapp-cta/);
     assert.match(source, /target="_blank" rel="noopener"/);
     for (const href of requiredLinks) assert.ok(source.includes(`href="${href}"`), `link ${href} ausente`);
