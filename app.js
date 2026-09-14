@@ -1,6 +1,6 @@
 "use strict";
 
-const WHATSAPP_NUMBER = "553125102500";
+const WHATSAPP_NUMBER = "5531990102500";
 const WHATSAPP_MESSAGE = "Olá, vim pelo app Reforma Profissional e quero solicitar um serviço.";
 const STORAGE_KEY = "reforma-profissional-solicitacoes";
 const CURRENT_KEY = "reforma-profissional-protocolo-atual";
