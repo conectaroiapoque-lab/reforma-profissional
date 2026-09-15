@@ -104,3 +104,16 @@ O telefone fixo para ligações é **(31) 2510-2500**. Os botões de WhatsApp us
 6. **Operação:** criar disponibilidade, área de cobertura, preços/orçamentos, agenda, avaliações e canais de suporte.
 7. **Segurança e privacidade:** termos jurídicos, LGPD, criptografia, retenção de dados, logs e proteção contra abuso.
 8. **PWA completo:** os ícones vetoriais atuais atendem ao manifest sem arquivos binários; atalhos e screenshots podem ser adicionados quando os ativos visuais forem aprovados.
+
+## Arquitetura marketplace on-demand — Fase 1
+
+A evolução incremental para despacho sob demanda está documentada em:
+
+- [Arquitetura e roadmap](docs/architecture.md)
+- [Fluxo do marketplace](docs/marketplace-flow.md)
+- [Pricing e integridade financeira](docs/pricing.md)
+- [Geolocalização, ETA e matching](docs/geo-matching.md)
+- [Segurança e LGPD](docs/security.md)
+- [Contrato conceitual da API](docs/api-contract.md)
+
+Os módulos locais são contratos e implementações leves para o MVP. Eles não substituem validação server-side, transações, autenticação ou infraestrutura de produção.
