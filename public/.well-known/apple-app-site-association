@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "details": [{
+      "appIDs": ["APPLE_TEAM_ID.APP_BUNDLE_ID"],
+      "components": [
+        { "/": "/solicitar-servico/", "comment": "Solicitação de serviço" },
+        { "/": "/pedido/*", "comment": "Acompanhamento do pedido" }
+      ]
+    }]
+  }
+}
