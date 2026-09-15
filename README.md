@@ -1,5 +1,25 @@
 # Reforma Profissional
 
+## Canais suportados
+
+- Web / site
+- PWA instalável
+- Android / Google Play
+- iOS (iPhone e iPad) / Apple App Store
+
+Os quatro canais compartilham a mesma aplicação, catálogo e lógica de negócio. Capacitor empacota o build Web em shells nativos; não existem cópias dos motores de pricing, geo, matching, pedidos ou pagamentos. A preparação de loja e TestFlight está em [`docs/ios.md`](docs/ios.md) e [`docs/app-store-release.md`](docs/app-store-release.md).
+
+```bash
+npm install
+npm run build
+npm run sync:android
+npm run sync:ios
+npm run open:android
+npm run open:ios
+```
+
+O registry do ambiente de preparação recusou os pacotes Capacitor (HTTP 403). Assim, dependências e configuração estão declaradas, mas a geração/sincronização nativa precisa ser concluída quando o registry estiver disponível. iOS exige macOS e Xcode, Team/assinatura reais, identificadores confirmados, assets oficiais, validação de privacidade e metadata de loja; Android exige Android Studio/SDK e configuração de assinatura da Play. Nenhum segredo de loja integra o frontend.
+
 MVP mobile first de um site/app PWA para solicitar e acompanhar serviços de reforma, manutenção e assistência residencial ou comercial. Feito somente com HTML, CSS e JavaScript puro, sem dependências, banco de dados ou arquivos binários.
 
 ## Funcionalidades
@@ -27,6 +47,9 @@ MVP mobile first de um site/app PWA para solicitar e acompanhar serviços de ref
 - `manifest.webmanifest`: metadados do PWA e ícones vetoriais instaláveis.
 - `icons/`: ícones SVG textuais equivalentes aos tamanhos 192, 512 e 512 maskable; mantêm o PR livre de arquivos binários.
 - `sw.js`: cache básico e fallback offline.
+- `config/app-config.js`: identidade, versão e ambientes sem segredos.
+- `mobile/`: deep links, localização, push, analytics e error reporting compartilhados.
+- `ios/`: templates nativos auditáveis; o workspace é gerado pelo Capacitor no macOS.
 
 ## Como testar localmente
 

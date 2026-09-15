@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>NSLocationWhenInUseUsageDescription</key><string>Usamos sua localização para encontrar prestadores próximos, estimar a distância e organizar o atendimento.</string>
+<key>NSCameraUsageDescription</key><string>Use a câmera para enviar fotos relacionadas ao serviço solicitado.</string>
+<key>NSPhotoLibraryUsageDescription</key><string>Selecione fotos relacionadas ao atendimento para ajudar no orçamento e na execução.</string>
+<key>NSUserNotificationsUsageDescription</key><string>Receba atualizações da ordem de serviço, chegada do prestador, orçamento e pagamento.</string>
+</dict></plist>
