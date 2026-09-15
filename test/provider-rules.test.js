@@ -4,15 +4,15 @@ const assert = require("node:assert/strict");
 const Rules = require("../provider.js");
 
 test("termos têm versões independentes e formato não vazio", () => {
-  assert.equal(Rules.PROVIDER_TERMS_VERSION, "1.0-2026-09");
-  assert.equal(Rules.CLIENT_TERMS_VERSION, "1.0-2026-09");
+  assert.equal(Rules.PROVIDER_TERMS_VERSION, "2.0-2026-09");
+  assert.equal(Rules.CLIENT_TERMS_VERSION, "2.0-2026-09");
   assert.equal(Rules.termsSections.length, 17);
   assert.ok(Rules.clientTermsSections.some(([title]) => title === "Intermediação"));
 });
 
 test("aceite registra versão, instante e identificador local, preservando campos futuros", () => {
   const accepted = Rules.createAcceptance({ providerId: "P-1", name: "Ana Silva", taxId: "123", acceptedAt: "2026-09-03T10:00:00Z" });
-  assert.deepEqual(accepted, { termsVersion: "1.0-2026-09", acceptedAt: "2026-09-03T10:00:00.000Z", providerId: "P-1", name: "Ana Silva", taxId: "123", ipAddress: null, userAgent: null, auditSource: "LOCAL_MVP" });
+  assert.deepEqual(accepted, { termsVersion: "2.0-2026-09", acceptedAt: "2026-09-03T10:00:00.000Z", providerId: "P-1", name: "Ana Silva", taxId: "123", ipAddress: null, userAgent: null, auditSource: "LOCAL_MVP" });
 });
 
 test("somente prestador aprovado recebe oportunidades", () => {

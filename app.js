@@ -169,7 +169,8 @@ function submitRequest(event){
   const data=Object.fromEntries(new FormData(form).entries());
   delete data.photo;
   const protocol=generateProtocol();
-  const request={...data,protocol,service:selectedService||$("[data-type].selected").dataset.type,type:$("[data-type].selected").dataset.type,urgency:selectedUrgency,status:statuses[0],statusIndex:0,provider:null,clientTermsAcceptance:{termsVersion:ProviderRules.CLIENT_TERMS_VERSION,acceptedAt:new Date().toISOString(),protocol,auditSource:"LOCAL_MVP"},createdAt:new Date().toISOString()};
+  const now=new Date().toISOString();
+  const request={...data,orderId:`ORD-${protocol}`,customerId:`LOCAL-${protocol}`,serviceId:selectedService||$("[data-type].selected").dataset.type,category:$("[data-type].selected").dataset.type,pricingSnapshot:null,providerId:null,providerOfferId:null,paymentStatus:"PENDING",providerPaymentStatus:"PENDING",materialMode:"NONE",materialAmounts:[],auditTrail:[{event:"ORDER_CREATED",from:null,to:"REQUESTED",actor:"CUSTOMER",timestamp:now}],scheduledAt:data.schedule||null,acceptedAt:null,providerArrivedAt:null,startedAt:null,completedAt:null,cancelledAt:null,...data,protocol,service:selectedService||$("[data-type].selected").dataset.type,type:$("[data-type].selected").dataset.type,urgency:selectedUrgency,orderStatus:"REQUESTED",status:statuses[0],statusIndex:0,provider:null,clientTermsAcceptance:{termsVersion:ProviderRules.CLIENT_TERMS_VERSION,acceptedAt:new Date().toISOString(),protocol,auditSource:"LOCAL_MVP"},createdAt:now};
   const requests=getRequests(); requests.unshift(request); saveRequests(requests);
   localStorage.setItem(CURRENT_KEY,protocol);
   $("#success-protocol").textContent=protocol;
@@ -228,6 +229,15 @@ function renderAdmin(){
   $("#metric-new").textContent=requests.filter(item=>item.statusIndex<2).length;
   $("#metric-progress").textContent=requests.filter(item=>item.statusIndex>=2&&item.statusIndex<6).length;
   $("#metric-done").textContent=requests.filter(item=>item.statusIndex===6).length;
+  $("#metric-unfilled").textContent=requests.filter(item=>!item.provider).length;
+  const operationProviders=getRegisteredProviders();
+  $("#metric-available").textContent=operationProviders.filter(item=>item.availabilityStatus==="AVAILABLE").length;
+  $("#metric-busy").textContent=operationProviders.filter(item=>item.availabilityStatus==="BUSY").length;
+  $("#metric-disputed").textContent=requests.filter(item=>item.orderStatus==="DISPUTED").length;
+  $("#metric-payments").textContent=requests.filter(item=>item.quote?.status==="APPROVED"&&item.paymentStatus!=="PAID").length;
+  $("#metric-payouts").textContent=requests.filter(item=>item.paymentStatus==="PAID"&&item.providerPaymentStatus!=="PAID").length;
+  $("#metric-margin").textContent=PaymentRules.formatCurrency(requests.reduce((sum,item)=>sum+(item.pricingSnapshot?.contributionMarginCents||0),0)/100);
+  $("#metric-scarcity").textContent=new Set(requests.filter(item=>!item.provider).map(item=>item.neighborhood).filter(Boolean)).size;
   $("#admin-list").innerHTML=requests.length?requests.map(request=>{
     const providerOptions=`<option value="">Selecionar prestador</option>`+providers.map(p=>`<option value="${p.name}" ${request.provider?.name===p.name?'selected':''}>${p.name} — ${p.specialty} — ${p.rating}</option>`).join("");
     return `<article class="admin-item" data-protocol="${request.protocol}"><div class="admin-item-head"><div><h3>${escapeHtml(request.name)}</h3><small>${escapeHtml(request.protocol)}</small></div><span class="status-pill">${escapeHtml(request.status)}</span></div><div class="admin-meta"><span>Serviço<b>${escapeHtml(request.service)}</b></span><span>WhatsApp<b>${escapeHtml(request.whatsapp)}</b></span><span>Urgência<b>${escapeHtml(request.urgency)}</b></span><span>Local<b>${escapeHtml(request.address)}, ${escapeHtml(request.number)} • ${escapeHtml(request.neighborhood)}</b></span><span>Prestador<b>${escapeHtml(request.provider?.name||"Não designado")}</b></span><span>Orçamento<b>${request.quote ? `${PaymentRules.formatCurrency(request.quote.value)} • ${request.quote.status}` : "Aguardando"}</b></span></div><div class="admin-actions"><select class="provider-select" aria-label="Selecionar prestador">${providerOptions}</select><button class="btn btn-light assign-provider">Designar prestador</button><input class="quote-value" type="number" min="0.01" step="0.01" value="${request.quote?.value||''}" placeholder="Valor do orçamento" aria-label="Valor do orçamento"><button class="btn btn-light approve-quote">Aprovar orçamento</button><button class="btn btn-light mark-paid" ${request.quote?.status!=="APPROVED"?'disabled':''}>Marcar como pago</button><button class="btn btn-light next-status">Alterar status →</button><a class="btn btn-whatsapp" href="https://wa.me/${String(request.whatsapp).replace(/\D/g,'')}?text=${encodeURIComponent(`Olá ${request.name}, falamos da Reforma Profissional sobre o protocolo ${request.protocol}.`)}" target="_blank" rel="noopener">Chamar cliente</a></div></article>`;
@@ -286,7 +296,7 @@ function bindEvents(){
     const status=$("#location-status");
     if(!navigator.geolocation){status.textContent="Geolocalização indisponível. Informe o endereço manualmente.";return;}
     status.textContent="Obtendo sua localização...";
-    navigator.geolocation.getCurrentPosition(position=>{$("[name=latitude]").value=position.coords.latitude;$("[name=longitude]").value=position.coords.longitude;status.textContent=`✓ Localização capturada (${position.coords.latitude.toFixed(5)}, ${position.coords.longitude.toFixed(5)}). Complete o endereço.`;},()=>{status.textContent="Não foi possível acessar sua localização. Informe o endereço manualmente.";});
+    navigator.geolocation.getCurrentPosition(position=>{$("[name=latitude]").value=position.coords.latitude;$("[name=longitude]").value=position.coords.longitude;$("[name=locationAccuracy]").value=position.coords.accuracy;$("[name=locationTimestamp]").value=new Date(position.timestamp).toISOString();status.textContent=`✓ Localização capturada (${position.coords.latitude.toFixed(5)}, ${position.coords.longitude.toFixed(5)}). Complete o endereço.`;},()=>{status.textContent="Não foi possível acessar sua localização. Informe o endereço manualmente.";});
   });
   $("#assistant-request").addEventListener("click",()=>{if(assistantSelection)startRequest(assistantSelection[0]);});
   $("#refresh-admin").addEventListener("click",()=>{renderAdmin();showToast("Painel atualizado.");});

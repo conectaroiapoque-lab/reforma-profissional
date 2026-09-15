@@ -1,0 +1,4 @@
+"use strict";
+class MemoryEventBus{constructor(){this.handlers=new Map();}subscribe(event,handler){const list=this.handlers.get(event)||[];list.push(handler);this.handlers.set(event,list);return()=>this.handlers.set(event,list.filter(x=>x!==handler));}publish(event,payload){for(const handler of this.handlers.get(event)||[])handler(payload);return{event,publishedAt:new Date().toISOString()};}}
+class LocalJobQueue{constructor(){this.jobs=[];}enqueue(queue,payload){const job={jobId:`JOB-${Date.now()}-${this.jobs.length}`,queue,payload,status:"QUEUED"};this.jobs.push(job);return job;}async process(queue,handler){for(const job of this.jobs.filter(j=>j.queue===queue&&j.status==="QUEUED")){job.status="RUNNING";await handler(job.payload);job.status="COMPLETED";}}}
+module.exports={MemoryEventBus,LocalJobQueue};

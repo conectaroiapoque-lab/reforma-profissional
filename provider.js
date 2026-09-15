@@ -5,8 +5,8 @@
   if (typeof module === "object" && module.exports) module.exports = api;
   root.ProviderRules = api;
 })(typeof globalThis !== "undefined" ? globalThis : this, function createProviderRules() {
-  const PROVIDER_TERMS_VERSION = "1.0-2026-09";
-  const CLIENT_TERMS_VERSION = "1.0-2026-09";
+  const PROVIDER_TERMS_VERSION = "2.0-2026-09";
+  const CLIENT_TERMS_VERSION = "2.0-2026-09";
   const PROVIDER_STORAGE_KEY = "reforma-profissional-prestadores";
   const PROVIDER_STATUSES = Object.freeze(["CADASTRO INICIADO", "DOCUMENTOS PENDENTES", "EM ANÁLISE", "APROVADO", "REPROVADO", "SUSPENSO"]);
   const PAYOUT_STATUSES = Object.freeze(["AGUARDANDO EXECUÇÃO", "AGUARDANDO CONCLUSÃO", "AGUARDANDO DOCUMENTO FISCAL", "DOCUMENTO FISCAL RECEBIDO", "AGUARDANDO VALIDAÇÃO", "REPASSE LIBERADO", "REPASSE REALIZADO", "EM ANÁLISE"]);
@@ -25,7 +25,7 @@
     ["5. Não exclusividade", "O Prestador poderá atender clientes próprios e prestar serviços para outras empresas, pessoas ou plataformas, respeitando os serviços que voluntariamente tenha aceitado através da Reforma Profissional."],
     ["6. Responsabilidade técnica", "O Prestador é responsável pela execução técnica dos serviços que aceitar, devendo possuir conhecimento, ferramentas, habilitações, licenças e autorizações necessárias quando exigidas para sua atividade."],
     ["7. Equipamentos e ferramentas", "Salvo ajuste específico registrado no chamado, as ferramentas, equipamentos e meios necessários para a prestação do serviço são de responsabilidade do Prestador."],
-    ["8. Remuneração por serviço", "A remuneração ocorre por serviço efetivamente contratado, executado, concluído e validado através da Plataforma. O modelo comercial atual prevê participação de 60% do valor do serviço para o Prestador Executor. Os 40% restantes correspondem à remuneração de intermediação da Plataforma e demais custos da operação, conforme regras comerciais vigentes."],
+    ["8. Remuneração por serviço", "A remuneração ocorre por serviço efetivamente contratado, executado, concluído e validado através da Plataforma. Cada oportunidade apresenta a remuneração antes do aceite. Os valores podem variar conforme serviço, categoria, distância, urgência, complexidade, escassez e bônus, dentro das regras comerciais vigentes. O Prestador pode aceitar ou recusar livremente, e o valor aceito não poderá ser reduzido retroativamente."],
     ["9. Nota fiscal", "O Prestador é responsável por suas obrigações empresariais e fiscais. Quando aplicável à operação e à legislação correspondente, deverá emitir o documento fiscal referente ao serviço prestado ao Cliente/tomador identificado na contratação. Após a emissão, deverá disponibilizar os dados ou cópia à Reforma Profissional para registro e procedimento de liberação financeira. O fluxo fiscal é configurável e será validado por assessoria contábil e tributária."],
     ["10. Pagamento e repasse", "O Cliente realiza o pagamento pelos canais oficiais da Reforma Profissional. Após o cumprimento das condições da ordem de serviço, documentação necessária e validações previstas, a Plataforma poderá efetuar o repasse ao Prestador, inclusive por Pix para a conta ou chave cadastrada."],
     ["11. Sem pagamento direto", "Serviços originados através da Reforma Profissional devem permanecer registrados na Plataforma. Valores referentes a esses serviços e adicionais devem ser tratados pelos meios oficiais disponibilizados pela Plataforma."],
@@ -94,7 +94,7 @@ if (typeof document !== "undefined") {
     box.hidden = !groups.length; box.innerHTML = groups.join("");
   }
   document.querySelector("#provider-specialties").innerHTML = ProviderRules.specialties.map(item => `<label class="specialty-option"><input type="checkbox" name="specialties" value="${item}"><span>${item}</span></label>`).join("");
-  document.querySelector("#provider-summary-list").innerHTML = ["Você atua como profissional independente.", "Você escolhe quando ficar disponível.", "Você pode aceitar ou recusar serviços.", "Não há exclusividade.", "O pagamento é por serviço realizado.", "Você pode atender clientes próprios e outras plataformas.", "Serviços recebidos pela Reforma Profissional devem permanecer registrados na plataforma.", "O modelo comercial atual prevê 60% ao profissional executor.", "O documento fiscal deverá ser apresentado quando aplicável."].map(item => `<li>✓ ${item}</li>`).join("");
+  document.querySelector("#provider-summary-list").innerHTML = ["Você atua como profissional independente.", "Você escolhe quando ficar disponível.", "Você pode aceitar ou recusar serviços.", "Não há exclusividade.", "O pagamento é por serviço realizado.", "Você pode atender clientes próprios e outras plataformas.", "Serviços recebidos pela Reforma Profissional devem permanecer registrados na plataforma.", "Cada oportunidade informa a remuneração antes do aceite, sem redução retroativa.", "O documento fiscal deverá ser apresentado quando aplicável."].map(item => `<li>✓ ${item}</li>`).join("");
   document.querySelector("#provider-terms-version").textContent = ProviderRules.PROVIDER_TERMS_VERSION;
   document.querySelector("#provider-terms-content").innerHTML = ProviderRules.termsSections.map(([title, body]) => `<section><h2>${title}</h2><p>${body}</p></section>`).join("");
   document.querySelector("#client-terms-content").innerHTML = ProviderRules.clientTermsSections.map(([title, body]) => `<section><h2>${title}</h2><p>${body}</p></section>`).join("");
@@ -114,5 +114,34 @@ if (typeof document !== "undefined") {
     if (typeof showToast === "function") showToast("Cadastro enviado e colocado EM ANÁLISE.");
     if (typeof showView === "function") showView("provider-area");
     document.querySelector("#accepted-terms-display").textContent = `Versão ${provider.acceptance.termsVersion} • aceite em ${new Date(provider.acceptance.acceptedAt).toLocaleString("pt-BR")} • vigente no cadastro`;
+  });
+}
+
+if (typeof document !== "undefined") {
+  const availableButton = document.querySelector("#go-available");
+  const offlineButton = document.querySelector("#go-offline");
+  const availabilityStatus = document.querySelector("#availability-status");
+  availableButton?.addEventListener("click", () => {
+    if (!navigator.geolocation) { availabilityStatus.textContent = "Geolocalização indisponível. Permaneça OFFLINE."; return; }
+    availabilityStatus.textContent = "Solicitando sua permissão de localização…";
+    navigator.geolocation.getCurrentPosition(position => {
+      const currentId = localStorage.getItem("reforma-profissional-prestador-atual");
+      const providers = (() => { try { return JSON.parse(localStorage.getItem(ProviderRules.PROVIDER_STORAGE_KEY)) || []; } catch { return []; } })();
+      const provider = providers.find(item => item.providerId === currentId);
+      if (!provider || !ProviderRules.canReceiveServices(provider)) { availabilityStatus.textContent = "Somente prestadores aprovados podem ficar AVAILABLE."; return; }
+      provider.availabilityStatus = "AVAILABLE";
+      provider.location = { latitude: position.coords.latitude, longitude: position.coords.longitude, accuracy: position.coords.accuracy, timestamp: new Date(position.timestamp).toISOString(), consent: true, geoHash: null, geoCell: null, serviceAreaId: null };
+      localStorage.setItem(ProviderRules.PROVIDER_STORAGE_KEY, JSON.stringify(providers));
+      availabilityStatus.textContent = "AVAILABLE • localização consentida registrada para receber oportunidades.";
+      availableButton.disabled = true; offlineButton.disabled = false;
+    }, () => { availabilityStatus.textContent = "Permissão não concedida. Você permanece OFFLINE."; }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 });
+  });
+  offlineButton?.addEventListener("click", () => {
+    const currentId = localStorage.getItem("reforma-profissional-prestador-atual");
+    const providers = (() => { try { return JSON.parse(localStorage.getItem(ProviderRules.PROVIDER_STORAGE_KEY)) || []; } catch { return []; } })();
+    const provider = providers.find(item => item.providerId === currentId);
+    if (provider) { provider.availabilityStatus = "OFFLINE"; delete provider.location; localStorage.setItem(ProviderRules.PROVIDER_STORAGE_KEY, JSON.stringify(providers)); }
+    availabilityStatus.textContent = "OFFLINE • sua localização não está sendo utilizada.";
+    availableButton.disabled = false; offlineButton.disabled = true;
   });
 }

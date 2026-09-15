@@ -1,0 +1,4 @@
+"use strict";
+function calculateMarketBalance({openOrders=0,availableProviders=0,averageAcceptTime=0,unfilledOrders=0}){const providerSupplyRatio=openOrders?availableProviders/openOrders:availableProviders;const scarcityLevel=!openOrders||providerSupplyRatio>=1.5?"LOW":providerSupplyRatio>=1?"NORMAL":providerSupplyRatio>=.5?"HIGH":"CRITICAL";return{openOrders,availableProviders,averageAcceptTime,unfilledOrders,providerSupplyRatio,scarcityLevel};}
+function suggestScarcityBonus(balance,{bonusCapCents=3000,bonusCapPercent=15,customerPriceCents=0}={}){if(!["HIGH","CRITICAL"].includes(balance.scarcityLevel))return{suggestedBonusCents:0};const target=balance.scarcityLevel==="CRITICAL"?bonusCapCents:Math.round(bonusCapCents/2);return{suggestedBonusCents:Math.min(target,Math.round(customerPriceCents*bonusCapPercent/100)),bonusCapCents,bonusCapPercent,requiresApproval:true};}
+module.exports={calculateMarketBalance,suggestScarcityBonus};
