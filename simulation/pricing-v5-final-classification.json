@@ -1,0 +1,898 @@
+[
+  {
+    "serviceCode": "V5C001",
+    "serviceName": "Visita / diagnóstico",
+    "currentCandidatePriceCents": 9990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5_WITH_MANUAL_APPROVAL"
+  },
+  {
+    "serviceCode": "V5C002",
+    "serviceName": "Instalação de torneira simples",
+    "currentCandidatePriceCents": 14990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C003",
+    "serviceName": "Troca de torneira",
+    "currentCandidatePriceCents": 14990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C004",
+    "serviceName": "Reparo torneira pingando",
+    "currentCandidatePriceCents": 12990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C005",
+    "serviceName": "Instalação/troca sifão",
+    "currentCandidatePriceCents": 11990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C006",
+    "serviceName": "Reparo descarga",
+    "currentCandidatePriceCents": 15990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C007",
+    "serviceName": "Troca mecanismo descarga",
+    "currentCandidatePriceCents": 18990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C008",
+    "serviceName": "Desentupimento simples pia/ralo",
+    "currentCandidatePriceCents": 19990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C009",
+    "serviceName": "Desentupimento simples vaso",
+    "currentCandidatePriceCents": 22990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C010",
+    "serviceName": "Vazamento aparente",
+    "currentCandidatePriceCents": 21990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C011",
+    "serviceName": "Filtro/purificador",
+    "currentCandidatePriceCents": 11990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C012",
+    "serviceName": "Máquina de lavar",
+    "currentCandidatePriceCents": 15990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C013",
+    "serviceName": "Troca registro acessível",
+    "currentCandidatePriceCents": 21990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C014",
+    "serviceName": "Instalação vaso sanitário",
+    "currentCandidatePriceCents": 29990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C015",
+    "serviceName": "Vazamento embutido",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C016",
+    "serviceName": "Caça-vazamento",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C017",
+    "serviceName": "Alteração de tubulação",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C018",
+    "serviceName": "Visita / diagnóstico",
+    "currentCandidatePriceCents": 8990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C019",
+    "serviceName": "Troca tomada",
+    "currentCandidatePriceCents": 11990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C020",
+    "serviceName": "Instalação tomada",
+    "currentCandidatePriceCents": 14990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C021",
+    "serviceName": "Troca interruptor",
+    "currentCandidatePriceCents": 10990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C022",
+    "serviceName": "Instalação interruptor",
+    "currentCandidatePriceCents": 13990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C023",
+    "serviceName": "Instalação luminária",
+    "currentCandidatePriceCents": 14990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C024",
+    "serviceName": "Instalação chuveiro elétrico",
+    "currentCandidatePriceCents": 14990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C025",
+    "serviceName": "Troca resistência",
+    "currentCandidatePriceCents": 9990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C026",
+    "serviceName": "Ventilador teto",
+    "currentCandidatePriceCents": 17990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C027",
+    "serviceName": "Troca disjuntor",
+    "currentCandidatePriceCents": 16990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C028",
+    "serviceName": "Instalação disjuntor",
+    "currentCandidatePriceCents": 19990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C029",
+    "serviceName": "Curto circuito",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C030",
+    "serviceName": "Novo circuito",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C031",
+    "serviceName": "Quadro elétrico",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C032",
+    "serviceName": "Visita técnica",
+    "currentCandidatePriceCents": 9990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C033",
+    "serviceName": "Pequeno reparo até 2h",
+    "currentCandidatePriceCents": 19990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C034",
+    "serviceName": "Cerâmica",
+    "currentCandidatePriceCents": 4990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C035",
+    "serviceName": "Alvenaria",
+    "currentCandidatePriceCents": 5990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C036",
+    "serviceName": "Porcelanato",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C037",
+    "serviceName": "Reboco",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C038",
+    "serviceName": "Contrapiso",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C039",
+    "serviceName": "Revestimento",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C040",
+    "serviceName": "Demolição",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C041",
+    "serviceName": "Reforma banheiro",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C042",
+    "serviceName": "Reforma cozinha",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C043",
+    "serviceName": "Reforma casa/apartamento",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C044",
+    "serviceName": "Higienização split",
+    "currentCandidatePriceCents": 24990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C045",
+    "serviceName": "Manutenção preventiva",
+    "currentCandidatePriceCents": 24990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C046",
+    "serviceName": "Diagnóstico/corretiva",
+    "currentCandidatePriceCents": 29990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C047",
+    "serviceName": "Instalação split 9.000 a 12.000 BTU",
+    "currentCandidatePriceCents": 64990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5_WITH_MANUAL_APPROVAL"
+  },
+  {
+    "serviceCode": "V5C048",
+    "serviceName": "Split infraestrutura nova",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C049",
+    "serviceName": "Split acima de 12.000 BTU",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C050",
+    "serviceName": "Carga de gás",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C051",
+    "serviceName": "Vazamento refrigerante",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C052",
+    "serviceName": "Desinstalação",
+    "currentCandidatePriceCents": 29990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C053",
+    "serviceName": "Quadro",
+    "currentCandidatePriceCents": 7990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C054",
+    "serviceName": "Prateleira",
+    "currentCandidatePriceCents": 11990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C055",
+    "serviceName": "Varal",
+    "currentCandidatePriceCents": 11990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C056",
+    "serviceName": "Cortina/persiana",
+    "currentCandidatePriceCents": 11990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C057",
+    "serviceName": "Espelho",
+    "currentCandidatePriceCents": 13990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C058",
+    "serviceName": "Suporte TV",
+    "currentCandidatePriceCents": 15990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C059",
+    "serviceName": "Pacote até 2h",
+    "currentCandidatePriceCents": 24990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C060",
+    "serviceName": "Pacote até 4h",
+    "currentCandidatePriceCents": 39990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C061",
+    "serviceName": "Visita técnica",
+    "currentCandidatePriceCents": 9990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C062",
+    "serviceName": "Pequeno reparo",
+    "currentCandidatePriceCents": 15990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C063",
+    "serviceName": "Forro",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C064",
+    "serviceName": "Sanca",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C065",
+    "serviceName": "Parede drywall",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C066",
+    "serviceName": "Divisória",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C067",
+    "serviceName": "Regulagem",
+    "currentCandidatePriceCents": 11990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C068",
+    "serviceName": "Dobradiça",
+    "currentCandidatePriceCents": 13990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C069",
+    "serviceName": "Instalação fechadura",
+    "currentCandidatePriceCents": 17990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C070",
+    "serviceName": "Reparo móvel",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C071",
+    "serviceName": "Instalação porta interna",
+    "currentCandidatePriceCents": 44990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C072",
+    "serviceName": "Móvel planejado",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C073",
+    "serviceName": "Móvel pequeno",
+    "currentCandidatePriceCents": 14990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C074",
+    "serviceName": "Mesa",
+    "currentCandidatePriceCents": 17990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C075",
+    "serviceName": "Cômoda",
+    "currentCandidatePriceCents": 21990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C076",
+    "serviceName": "Guarda-roupa pequeno",
+    "currentCandidatePriceCents": 25990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C077",
+    "serviceName": "Guarda-roupa médio",
+    "currentCandidatePriceCents": 39990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C078",
+    "serviceName": "Guarda-roupa grande",
+    "currentCandidatePriceCents": 49990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C079",
+    "serviceName": "Vedação/silicone",
+    "currentCandidatePriceCents": 14990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C080",
+    "serviceName": "Regulagem box",
+    "currentCandidatePriceCents": 19990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C081",
+    "serviceName": "Box",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C082",
+    "serviceName": "Espelho grande",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C083",
+    "serviceName": "Guarda-corpo",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C084",
+    "serviceName": "Regulagem/reparo",
+    "currentCandidatePriceCents": 19990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C085",
+    "serviceName": "Janela",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C086",
+    "serviceName": "Porta",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C087",
+    "serviceName": "Sob medida",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C088",
+    "serviceName": "Visita",
+    "currentCandidatePriceCents": 14990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C089",
+    "serviceName": "Reparo/goteira",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C090",
+    "serviceName": "Troca telha",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C091",
+    "serviceName": "Calha",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C092",
+    "serviceName": "Telhado novo",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C093",
+    "serviceName": "Telhado retrátil",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C094",
+    "serviceName": "Solda pontual",
+    "currentCandidatePriceCents": 19990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C095",
+    "serviceName": "Reparo portão",
+    "currentCandidatePriceCents": 19990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C096",
+    "serviceName": "Janela",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C097",
+    "serviceName": "Porta",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C098",
+    "serviceName": "Grade",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C099",
+    "serviceName": "Guarda-corpo",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C100",
+    "serviceName": "Corrimão",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C101",
+    "serviceName": "Cobertura metálica",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C102",
+    "serviceName": "Configuração dispositivo",
+    "currentCandidatePriceCents": 14990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C103",
+    "serviceName": "Tomada inteligente",
+    "currentCandidatePriceCents": 17990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C104",
+    "serviceName": "Interruptor inteligente",
+    "currentCandidatePriceCents": 17990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C105",
+    "serviceName": "Alexa + automação básica",
+    "currentCandidatePriceCents": 24990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C106",
+    "serviceName": "Câmera Wi-Fi",
+    "currentCandidatePriceCents": 19990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C107",
+    "serviceName": "Fechadura inteligente",
+    "currentCandidatePriceCents": 24990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C108",
+    "serviceName": "Projeto completo",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C109",
+    "serviceName": "Visita técnica",
+    "currentCandidatePriceCents": 14990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C110",
+    "serviceName": "Limpeza até 10 módulos",
+    "currentCandidatePriceCents": 49990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C111",
+    "serviceName": "Manutenção",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C112",
+    "serviceName": "Instalação",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C113",
+    "serviceName": "Ampliação",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C114",
+    "serviceName": "Projeto/homologação",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C115",
+    "serviceName": "Diagnóstico",
+    "currentCandidatePriceCents": 14990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C116",
+    "serviceName": "Pequeno reparo",
+    "currentCandidatePriceCents": 24990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C117",
+    "serviceName": "Laje",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C118",
+    "serviceName": "Banheiro",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C119",
+    "serviceName": "Manta",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C120",
+    "serviceName": "Infiltração",
+    "currentCandidatePriceCents": null,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_AS_QUOTE"
+  },
+  {
+    "serviceCode": "V5C121",
+    "serviceName": "Pequena",
+    "currentCandidatePriceCents": 39990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C122",
+    "serviceName": "Até aproximadamente 60m2",
+    "currentCandidatePriceCents": 59990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C123",
+    "serviceName": "Leve",
+    "currentCandidatePriceCents": 1290,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C124",
+    "serviceName": "Média",
+    "currentCandidatePriceCents": 1590,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C125",
+    "serviceName": "Pesada",
+    "currentCandidatePriceCents": 1790,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  },
+  {
+    "serviceCode": "V5C126",
+    "serviceName": "Diarista até 4h",
+    "currentCandidatePriceCents": 12990,
+    "proposedCustomerPriceCents": 17990,
+    "status": "READY_FOR_V5_WITH_MANUAL_APPROVAL"
+  },
+  {
+    "serviceCode": "V5C127",
+    "serviceName": "Diarista diária",
+    "currentCandidatePriceCents": 19990,
+    "proposedCustomerPriceCents": 24990,
+    "status": "READY_FOR_V5_WITH_MANUAL_APPROVAL"
+  },
+  {
+    "serviceCode": "V5C128",
+    "serviceName": "Limpeza pesada",
+    "currentCandidatePriceCents": 24990,
+    "proposedCustomerPriceCents": null,
+    "status": "READY_FOR_V5"
+  }
+]
