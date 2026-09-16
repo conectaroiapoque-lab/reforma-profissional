@@ -30,8 +30,8 @@ test("cards populares carregam os códigos oficiais V4 esperados", () => {
 test("card inteiro e seta compartilham uma única ação que avança para detalhes", () => {
   assert.match(app, /<button type="button" class="service-card"[^>]+data-code=/);
   assert.match(app, /<span aria-hidden="true">→<\/span>/);
-  assert.match(app, /if\(service\)activateServiceCard\(service\.dataset\.code\)/);
-  assert.match(app, /function activateServiceCard\(code\)\{startRequest\(code\);if\(selectedServiceCode\)showStep\(2\);\}/);
+  assert.match(app, /if\(service\)\{activateServiceCard\(service\.dataset\.code\);return\}/);
+  assert.match(app, /function activateServiceCard\(code\)\{startRequest\(code\);if\(!selectedServiceCode\)return false;showStep\(2\);return true;\}/);
   assert.equal((app.match(/activateServiceCard\(service\.dataset\.code\)/g) || []).length, 1);
 });
 
