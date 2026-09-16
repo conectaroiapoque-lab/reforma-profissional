@@ -1,0 +1,1 @@
+"use strict";const {adminHandler}=require("../../server/privileged-api");const {productionRepository}=require("../../server/order-repository");module.exports=(req,res)=>adminHandler({repository:productionRepository()})(req,res);
