@@ -63,6 +63,6 @@ test("Google Ads e a atualização do cache permanecem intactos", () => {
   assert.match(app, /AW-17424041657\/Rb7QCI780u4cELmNt_RA/);
   assert.match(landingScript, /AW-17424041657\/Rb7QCI780u4cELmNt_RA/);
   assert.match(index, /src="app\.js\?v=7"/);
-  assert.match(worker, /CACHE_NAME = "reforma-profissional-v11"/);
-  assert.match(worker, /"\.\/app\.js\?v=9"/);
+  assert.match(worker, /CACHE_NAME = "reforma-profissional-v12"/);
+  assert.match(worker, /"\.\/app\.js\?v=10"/);
 });

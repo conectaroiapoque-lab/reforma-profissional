@@ -1,9 +1,9 @@
-const CACHE_NAME = "reforma-profissional-v11";
+const CACHE_NAME = "reforma-profissional-v12";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css?v=3",
-  "./app.js?v=9",
+  "./app.js?v=10",
   "./landing-pages.css?v=1",
   "./landing-pages.js?v=1",
   "./eletricista-bh/",
