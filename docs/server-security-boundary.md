@@ -11,6 +11,8 @@ Produção exige estas variáveis, configuradas somente no provedor (nunca com p
 
 A aplicação falha fechada se segredo ou storage durável não estiver configurado. Não há credencial padrão, senha, token administrativo ou papel armazenado no browser.
 
+Essas variáveis são obrigatórias somente quando uma Function atende uma operação em runtime. O build estático não instancia repositories, não assina sessões e não depende de Redis, HMAC ou IdP. A Vercel detecta automaticamente `api/**/*.js` como Node.js Functions; `vercel.json` não força um runtime redundante.
+
 ## Sessões e autorização
 
 `server/auth.js` valida assinatura, expiração, sujeito, papel e permissões no servidor. Os papéis são `CUSTOMER`, `PROVIDER`, `ATTENDANT`, `ADMIN` e `FINANCE`. Alterar payload, query string, `localStorage`, `window` ou CSS não produz uma assinatura válida.
