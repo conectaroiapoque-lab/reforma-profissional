@@ -33,7 +33,7 @@
     ["13. Proteção dos dados", "O Prestador deverá utilizar os dados do Cliente exclusivamente para execução do serviço autorizado. É proibido armazenar, compartilhar, vender ou utilizar os dados para finalidades estranhas ao chamado."],
     ["14. Avaliação e qualidade", "O Cliente poderá avaliar a execução do serviço. Avaliações, reclamações, cancelamentos, pontualidade, conclusão e qualidade poderão ser considerados para organização e priorização de oportunidades na Plataforma."],
     ["15. Ranking", "Os níveis Bronze, Prata, Ouro e Diamante compõem um mecanismo de reputação dentro da Plataforma e não representam cargo, promoção trabalhista ou hierarquia funcional."],
-    ["16. Garantia ao cliente", "O Prestador deverá cumprir as obrigações relativas ao serviço contratado e colaborar com os procedimentos de garantia, correção, avaliação e suporte aplicáveis. A garantia adicional oferecida pela Reforma Profissional será de até 90 dias, conforme serviço, regras e legislação aplicável."],
+    ["16. Garantia ao cliente", "O Prestador deverá cumprir as obrigações relativas ao serviço contratado e colaborar com os procedimentos de garantia, correção, avaliação e suporte aplicáveis. Os direitos legais de garantia são preservados; eventual garantia contratual será adicional, escrita e claramente delimitada."],
     ["17. Suspensão", "A Plataforma poderá suspender ou encerrar o acesso em caso de fraude comprovada, uso indevido de dados, falsidade documental, descumprimento grave de serviço aceito, tentativa comprovada de desvio de cliente, risco à segurança de clientes ou violação grave dos termos. Recusar oportunidade, ficar indisponível ou trabalhar para terceiros não são motivos automáticos de suspensão."]
   ];
   const clientTermsSections = [

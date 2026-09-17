@@ -1,0 +1,8 @@
+"use strict";
+const { deepFreeze } = require("./financial-engine");
+const QUOTE_FLOW = Object.freeze(["CUSTOMER_REQUEST", "PROVIDER_ANALYSIS", "PROVIDER_QUOTE_SUBMITTED", "PLATFORM_REVIEW", "QUOTE_APPROVED", "CUSTOMER_QUOTE_SENT", "CUSTOMER_APPROVED", "PROVIDER_AUTHORIZED", "SERVICE_STARTED"]);
+function customerView(order) { const f = order.financial || {}; return deepFreeze({ service: order.service, scope: order.scope, labor: f.labor, materials: f.materials, discount: f.discount, cashback: f.cashback, total: f.customerTotal, guarantee: order.guarantee, professional: order.professional, invoice: order.invoice, status: order.status }); }
+function providerView(order) { const f = order.financial || {}; return deepFreeze({ serviceCode: order.serviceCode, scope: order.scope, necessaryLocation: order.necessaryLocation, grossReceivable: f.providerGross, withholdings: f.withholdings, netReceivable: f.providerNet, bonus: f.bonus, taxDocumentStatus: order.taxDocumentStatus, status: order.status }); }
+function adminView(order) { const f = order.financial || {}; return deepFreeze({ customerTotal: f.customerTotal, providerGross: f.providerGross, withholdings: f.withholdings, providerNet: f.providerNet, platformRevenue: f.platformRevenue, taxes: f.taxes, CAC: f.CAC, fees: f.fees, reserves: f.reserves, margin: f.margin, documents: order.documents, settlement: order.settlement }); }
+function recordImmediateExecutionRequest(requested, timestamp = new Date()) { return deepFreeze({ customerRequestedImmediateExecution: requested === true, timestamp: requested === true ? new Date(timestamp).toISOString() : null, waiverOfWithdrawalRight: false }); }
+module.exports = { QUOTE_FLOW, customerView, providerView, adminView, recordImmediateExecutionRequest };
