@@ -38,8 +38,8 @@
   ];
   const clientTermsSections = [
     ["Intermediação", "A Reforma Profissional atua como plataforma tecnológica de intermediação e organização do atendimento. O serviço técnico é executado pelo Prestador independente identificado no chamado. A Plataforma poderá intermediar pagamentos, atendimento, suporte, registro do orçamento, acompanhamento e demais recursos relacionados à contratação."],
-    ["Contratação registrada", "Orçamentos, serviços adicionais e pagamentos devem permanecer registrados no chamado oficial para permitir acompanhamento e aplicação dos benefícios e da garantia adicional, quando cabíveis."],
-    ["Garantia e suporte", "A garantia adicional poderá ser de até 90 dias, conforme o serviço, as regras aplicáveis e sem prejuízo dos direitos previstos na legislação."],
+    ["Contratação registrada", "Orçamentos, serviços adicionais e pagamentos devem permanecer registrados no chamado oficial para permitir acompanhamento e aplicação dos benefícios contratuais informados, quando cabíveis. Os direitos legais de garantia são preservados."],
+    ["Garantia e suporte", "Seus direitos legais de garantia são preservados. Para serviços duráveis, o prazo para reclamação de vícios aparentes ou de fácil constatação é de até 90 dias, observada a legislação aplicável. Vícios ocultos seguem as regras legais específicas. Eventuais benefícios contratuais adicionais serão informados separadamente, por escrito, sem substituir ou limitar esses direitos."],
     ["Dados e contato", "Os dados serão usados para organizar o atendimento, permitir contato autorizado, processar pagamentos e cumprir obrigações aplicáveis, conforme a Política de Privacidade."]
   ];
   const canReceiveServices = provider => provider?.status === "APROVADO";
