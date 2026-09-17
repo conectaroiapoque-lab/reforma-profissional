@@ -119,6 +119,25 @@ test("CTA abre a seleção e Solicitar outro serviço reinicia o fluxo", () => {
   assert.equal(activeStep(h), 1);
 });
 
+test("categoria unificada exibe o nome completo e carrega apenas seus serviços V4", () => {
+  const h = createHarness();
+  const unifiedLabel = "MONTAGEM / INSTALAÇÃO / MARIDO DE ALUGUEL";
+  const categoryMarkup = h.ids.get("service-types").innerHTML;
+  assert.equal(categoryMarkup.split(unifiedLabel).length - 1, 1);
+  assert.doesNotMatch(categoryMarkup, />Montagem</);
+  assert.doesNotMatch(categoryMarkup, />Instalação</);
+  assert.doesNotMatch(categoryMarkup, />Marido de Aluguel</);
+
+  const category = new FakeElement({ dataset: { category: "MONTAGEM E INSTALAÇÃO" } });
+  h.categories.push(category);
+  h.click(category);
+
+  const expected = catalog.catalog.filter(service => service.category === "MONTAGEM E INSTALAÇÃO");
+  assert.ok(expected.length > 0);
+  for (const service of expected) assert.match(h.ids.get("official-service").innerHTML, new RegExp(service.code));
+  assert.equal((h.ids.get("official-service").innerHTML.match(/<option value="RP/g) || []).length, expected.length);
+});
+
 test("card inteiro seleciona o código e mostra detalhes e preço FIXED", () => {
   const h = createHarness();
   h.click(new FakeElement({ dataset: { code: "RP0001" } }));
