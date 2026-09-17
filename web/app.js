@@ -1,5 +1,8 @@
 "use strict";
 const WHATSAPP_NUMBER="5531990102500";
+const CATEGORY_LABELS=Object.freeze({
+ "MONTAGEM E INSTALAÇÃO":"MONTAGEM / INSTALAÇÃO / MARIDO DE ALUGUEL"
+});
 const statuses=["Solicitação recebida","Buscando profissional","Profissional designado","Profissional a caminho","Chegou ao local","Serviço em andamento","Serviço finalizado"];
 let selectedServiceCode="",selectedUrgency="",currentStep=1,currentOrder=null;
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -10,10 +13,11 @@ const showToast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");
 function trackWhatsappConversion(){if(typeof window.gtag==="function")window.gtag("event","conversion",{send_to:"AW-17424041657/Rb7QCI780u4cELmNt_RA"});}
 function showView(name){const view=$(`#${name}-view`);if(!view)return false;$$('.view').forEach(v=>v.classList.remove('active'));view.classList.add('active');view.removeAttribute?.('aria-hidden');$$('.view').filter(v=>v!==view).forEach(v=>v.setAttribute?.('aria-hidden','true'));window.scrollTo({top:0,behavior:'smooth'});if(name==='tracking')renderTracking();return true;}
 function serviceLabel(service){return service.pricingMode==='QUOTE'?`${service.name} — Sob orçamento`:`${service.name} — ${money(service.customerPriceCents)}`;}
+function categoryLabel(category){return CATEGORY_LABELS[category]||category;}
 function renderStatic(){
  const catalog=globalThis.ReformaProfissionalCatalog.catalog;
  const categories=[...new Set(catalog.map(s=>s.category))];
- $('#service-types').innerHTML=categories.map(c=>`<button type="button" class="choice" data-category="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('')+'<label class="wide">Serviço<select id="official-service" required><option value="">Escolha primeiro uma categoria</option></select></label>';
+ $('#service-types').innerHTML=categories.map(c=>`<button type="button" class="choice choice-category" data-category="${escapeHtml(c)}">${escapeHtml(categoryLabel(c))}</button>`).join('')+'<label class="wide">Serviço<select id="official-service" required><option value="">Escolha primeiro uma categoria</option></select></label>';
  $('.trust-strip').innerHTML=["Profissionais verificados","Atendimento rápido","Segurança para o cliente","Orçamento transparente","Acompanhamento","Suporte via WhatsApp"].map(x=>`<div class="trust-item"><i>✓</i><span>${x}</span></div>`).join('');
  const popular=catalog.slice(0,14);$('#popular-services').innerHTML=popular.map(s=>`<button type="button" class="service-card" data-code="${s.code}" aria-label="Selecionar ${escapeHtml(s.name)}"><b>${escapeHtml(s.name)}</b><span aria-hidden="true">→</span></button>`).join('');
  $('#common-problems').innerHTML=catalog.slice(14,29).map(s=>`<button type="button" class="chip" data-code="${s.code}">${escapeHtml(s.name)}</button>`).join('');

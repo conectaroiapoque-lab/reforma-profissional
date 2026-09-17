@@ -17,6 +17,6 @@
 /* Operação on-demand */
 .control-tower{margin-top:20px}.control-tower strong{font-size:clamp(22px,3vw,35px)}.availability-card{background:white;border:1px solid var(--line);border-radius:20px;padding:24px;margin:20px 0}.availability-card small{display:block;color:var(--muted);line-height:1.5;margin-top:14px}
 
-/* Destaque de serviços rápidos da Home */
-.quick-services-highlight{margin-top:34px;padding:22px 24px;border:1px solid rgba(255,255,255,.2);border-radius:20px;background:rgba(255,255,255,.09);display:flex;align-items:center;justify-content:space-between;gap:24px;box-shadow:0 16px 36px rgba(0,0,0,.12)}.quick-services-highlight h2{max-width:680px;margin:7px 0 4px;font-size:clamp(20px,2.4vw,31px);line-height:1.12;letter-spacing:-.7px}.quick-services-highlight p{margin:0}.quick-services-highlight .btn{flex:none}
-@media(max-width:700px){.quick-services-highlight{align-items:stretch;flex-direction:column;padding:20px}.quick-services-highlight .btn{width:100%}}
+/* Os nomes longos das categorias quebram em linhas sem reduzir a legibilidade. */
+.choice-category{min-height:72px;line-height:1.35;overflow-wrap:anywhere}
+@media(max-width:520px){.choice-category{min-height:76px}}
