@@ -1,4 +1,4 @@
-const CACHE_NAME = "reforma-profissional-v13";
+const CACHE_NAME = "reforma-profissional-v14";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -13,9 +13,11 @@ const APP_SHELL = [
   "./marido-de-aluguel-bh/",
   "./solicitar-servico/",
   "./manifest.webmanifest",
-  "./icons/icon-192.svg",
-  "./icons/icon-512.svg",
-  "./icons/icon-maskable-512.svg"
+  "./icons/brand-icon-192.svg",
+  "./icons/brand-icon-512.svg",
+  "./icons/brand-icon-maskable-512.svg",
+  "./assets/brand/reforma-profissional-logo.svg",
+  "./assets/brand/reforma-profissional-mark.svg"
 ];
 
 self.addEventListener("install", event => {

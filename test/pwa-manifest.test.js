@@ -20,7 +20,7 @@ test("all manifest icons are textual SVG files with valid metadata", () => {
 
     const iconPath = path.join(root, icon.src.replace(/^\.\//, ""));
     const source = fs.readFileSync(iconPath, "utf8");
-    assert.match(source, /^<svg[^>]+viewBox="0 0 \d+ \d+"/);
+    assert.match(source, /^<svg[^>]+viewBox="0 0 192 192"/);
     assert.doesNotMatch(source, /data:image\//);
   }
 });
