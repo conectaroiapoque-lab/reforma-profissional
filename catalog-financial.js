@@ -93,5 +93,11 @@ const FINANCIAL_CATALOG = Object.freeze({
   RP0088: Object.freeze({ serviceCode: "RP0088", providerTier: "SPECIALIST", providerMinimumPayoutCents: 0, financialRules: Object.freeze({}) }),
   RP0089: Object.freeze({ serviceCode: "RP0089", providerTier: "SPECIALIST", providerMinimumPayoutCents: 0, financialRules: Object.freeze({}) }),
 });
-function getFinancialServiceByCode(code) { return FINANCIAL_CATALOG[code] || null; }
+function getFinancialServiceByCode(code) {
+  if (FINANCIAL_CATALOG[code]) return FINANCIAL_CATALOG[code];
+  // V7 additions still use the same segregated rules; no margin or payout is
+  // ever copied into the public catalogue.
+  if (/^V7[HMCPL]\d{3}$/.test(code)) return Object.freeze({ serviceCode: code, providerTier: "TECHNICAL", providerMinimumPayoutCents: 0, financialRules: Object.freeze({}) });
+  return null;
+}
 module.exports = Object.freeze({ FINANCIAL_CATALOG, getFinancialServiceByCode, CATALOG_VERSION });
