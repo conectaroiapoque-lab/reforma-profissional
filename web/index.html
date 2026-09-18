@@ -15,7 +15,7 @@
   <meta name="theme-color" content="#092b4c">
   <meta name="description" content="Serviços de reforma e manutenção com atendimento rápido.">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
   <title>Reforma Profissional</title>
 </head>
 <body>
@@ -78,10 +78,11 @@
 
     <section id="request-view" class="view page-view">
       <button class="back-btn" data-view="home">← Voltar ao início</button>
+      <div class="request-brand" aria-label="Reforma Profissional — App da Reforma à Construção"><img src="icons/icon-512.svg" alt="" width="112" height="112"><span><b>Reforma Profissional</b><small>App da Reforma à Construção</small></span></div>
       <div class="flow-header"><span class="eyebrow">SOLICITAR SERVIÇO</span><h1>Do que você precisa?</h1><p>Leva menos de 2 minutos.</p></div>
       <div class="steps" aria-label="Progresso"><div class="step active"><i>1</i><span>Serviço</span></div><div class="step"><i>2</i><span>Detalhes</span></div><div class="step"><i>3</i><span>Local</span></div><div class="step"><i>4</i><span>Cliente</span></div></div>
       <form id="request-form" class="form-card">
-        <fieldset class="form-step active" data-step="1"><legend>Escolha o tipo de serviço</legend><div class="choice-grid" id="service-types"></div><div class="selected-detail" id="selected-detail" hidden></div></fieldset>
+        <fieldset class="form-step service-step active" data-step="1"><legend>Escolha o tipo de serviço</legend><div class="choice-grid service-category-grid" id="service-types"></div><div class="service-select-block"><label for="official-service">Escolha o serviço</label><select id="official-service" class="service-select" required><option value="">Selecione um serviço</option></select></div><div class="selected-detail service-summary" id="selected-detail" aria-live="polite" hidden></div></fieldset>
         <fieldset class="form-step" data-step="2"><legend>Conte um pouco mais</legend><p class="selected-detail" id="selected-service-summary" aria-live="polite"></p><label>Descrição rápida do problema<textarea name="description" required rows="4" placeholder="Ex.: Minha torneira está vazando desde ontem..."></textarea></label><label>Foto opcional do local/problema<input type="file" name="photo" accept="image/*"><small>A foto é somente para visualização local e não será salva neste MVP.</small></label><label>Qual a urgência?</label><div class="choice-grid urgency" id="urgency-options"></div><div id="schedule-field" hidden><label>Data e horário<input type="datetime-local" name="schedule"></label></div></fieldset>
         <fieldset class="form-step" data-step="3"><legend>Onde será o atendimento?</legend><button type="button" class="btn btn-location" id="get-location">◎ Usar minha localização</button><p id="location-status" class="location-status">Ou informe o endereço manualmente.</p><input type="hidden" name="latitude"><input type="hidden" name="longitude"><input type="hidden" name="locationAccuracy"><input type="hidden" name="locationTimestamp"><div class="form-grid"><label class="wide">Endereço<input name="address" required autocomplete="street-address" placeholder="Rua, avenida..."></label><label>Número<input name="number" required inputmode="numeric" placeholder="123"></label><label>Complemento<input name="complement" placeholder="Apto, bloco..."></label><label>Bairro<input name="neighborhood" required placeholder="Seu bairro"></label><label>Cidade<input name="city" required placeholder="Sua cidade"></label><label class="wide">Referência<input name="reference" placeholder="Próximo a..."></label></div></fieldset>
         <fieldset class="form-step" data-step="4"><legend>Seus dados</legend><label>Nome completo<input name="name" required autocomplete="name" placeholder="Como podemos chamar você?"></label><label>WhatsApp<input name="whatsapp" required autocomplete="tel" inputmode="tel" placeholder="(31) 99999-9999"></label><div class="terms-summary"><h3>Antes de contratar</h3><ul><li>✓ Orçamento registrado.</li><li>✓ Pagamento pelos canais oficiais.</li><li>✓ Profissional identificado.</li><li>✓ Acompanhamento do chamado.</li><li>✓ Seus direitos legais de garantia são preservados.</li><li>✓ Cashback quando aplicável.</li></ul><p>Para preservar os registros, o acompanhamento e os benefícios informados, mantenha negociações, adicionais e pagamentos dentro do chamado oficial. Seus direitos legais de garantia são preservados.</p><button type="button" class="text-btn" data-view="client-terms">Ver termos</button></div><label class="check"><input type="checkbox" name="marketingConsent"><span>Quero receber ofertas <small>Opcional e desmarcado por padrão.</small></span></label><label class="check check-large"><input type="checkbox" name="terms" required><span><b>LI E ACEITO OS TERMOS DE CONTRATAÇÃO DA REFORMA PROFISSIONAL</b><small>Entendo que a Reforma Profissional conecta clientes e profissionais independentes e disponibiliza recursos de atendimento, acompanhamento e pagamento.</small></span></label></fieldset>
@@ -112,6 +113,6 @@
   <footer><div class="brand"><span class="brand-mark">RP</span><span>Reforma <b>Profissional</b></span></div><p>Reforma, manutenção e assistência com segurança.</p><a class="footer-phone" href="tel:+553125102500">Atendimento: (31) 2510-2500</a><small>© <span id="year"></span> Reforma Profissional.</small></footer>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="catalog.js?v=1" defer></script>
-  <script src="app.js?v=10" defer></script>
+  <script src="app.js?v=11" defer></script>
 </body>
 </html>
