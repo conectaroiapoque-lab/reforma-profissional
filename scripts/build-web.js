@@ -8,6 +8,8 @@ for(const entry of entries){const source=path.join(root,entry);if(fs.existsSync(
 fs.copyFileSync(path.join(root,"web","app.js"),path.join(out,"app.js"));
 fs.copyFileSync(path.join(root,"web","index.html"),path.join(out,"index.html"));
 fs.cpSync(path.join(root,"public",".well-known"),path.join(out,".well-known"),{recursive:true});
+fs.mkdirSync(path.join(out,"docs"),{recursive:true});
+fs.copyFileSync(path.join(root,"docs","customer-service-terms-v1.md"),path.join(out,"docs","customer-service-terms-v1.md"));
 const app=require(path.join(root,"config","app-config"));
 const association=path.join(out,".well-known","apple-app-site-association");
 fs.writeFileSync(association,fs.readFileSync(association,"utf8").replace("APP_BUNDLE_ID",app.iosBundleId));

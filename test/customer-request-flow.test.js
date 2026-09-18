@@ -119,7 +119,7 @@ test("CTA abre a seleção e Solicitar outro serviço reinicia o fluxo", () => {
   assert.equal(activeStep(h), 1);
 });
 
-test("categoria unificada exibe o nome completo e carrega apenas seus serviços V4", () => {
+test("categoria unificada exibe o nome completo e carrega apenas seus serviços V7", () => {
   const h = createHarness();
   const unifiedLabel = "MONTAGEM / INSTALAÇÃO / MARIDO DE ALUGUEL";
   const categoryMarkup = h.ids.get("service-types").innerHTML;
@@ -135,7 +135,7 @@ test("categoria unificada exibe o nome completo e carrega apenas seus serviços 
   const expected = catalog.catalog.filter(service => service.category === "MONTAGEM E INSTALAÇÃO");
   assert.ok(expected.length > 0);
   for (const service of expected) assert.match(h.ids.get("official-service").innerHTML, new RegExp(service.code));
-  assert.equal((h.ids.get("official-service").innerHTML.match(/<option value="RP/g) || []).length, expected.length);
+  assert.equal((h.ids.get("official-service").innerHTML.match(/<option value="(?:RP|V7)/g) || []).length, expected.length);
 });
 
 test("card inteiro seleciona o código e mostra detalhes e preço FIXED", () => {
@@ -144,7 +144,7 @@ test("card inteiro seleciona o código e mostra detalhes e preço FIXED", () => 
   assert.equal(h.app.getState().selectedServiceCode, "RP0001");
   assert.equal(activeStep(h), 2);
   assert.match(h.ids.get("selected-service-summary").textContent, /Instalação de tomada simples/);
-  assert.match(h.ids.get("selected-service-summary").textContent, /R\$\s*150,00/);
+  assert.match(h.ids.get("selected-service-summary").textContent, /R\$\s*149,90/);
   assert.equal(h.ids.get("next-step").hidden, false);
 });
 

@@ -4,7 +4,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const crypto = require("node:crypto");
 const candidate = require("../catalog-v5-candidate");
-const { catalog, CATALOG_VERSION } = require("../catalog");
+const { catalog, CATALOG_VERSION } = require("../catalog-v4");
 const { createDiarista4hReview } = require("../simulation/pricing-v5-diarista-4h-review");
 
 const review = createDiarista4hReview();

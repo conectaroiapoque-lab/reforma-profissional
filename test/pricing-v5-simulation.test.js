@@ -4,7 +4,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const crypto = require("node:crypto");
 const fs = require("node:fs");
-const { catalog } = require("../catalog");
+const { catalog } = require("../catalog-v4");
 const candidate = require("../catalog-v5-candidate");
 const simulator = require("../simulation/pricing-v5-simulator");
 

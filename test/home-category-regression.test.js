@@ -22,13 +22,13 @@ test("Home mantém o hero limpo, sem destaque separado de marido de aluguel", ()
   }
 });
 
-test("frontend usa uma categoria visual unificada sem alterar o catálogo V4", () => {
+test("frontend usa uma categoria visual unificada com o catálogo V7", () => {
   const app = read("web/app.js");
   assert.equal((app.match(/"MONTAGEM \/ INSTALAÇÃO \/ MARIDO DE ALUGUEL"/g) || []).length, 1);
   assert.match(app, /data-category=.*categoryLabel\(c\)/);
-  assert.equal(v4.CATALOG_VERSION, "RMBH-2026-09-v4");
-  assert.equal(v4.catalog.length, 89);
-  assert.equal(v4.catalog.filter(service => service.category === "MONTAGEM E INSTALAÇÃO").length, 16);
+  assert.equal(v4.CATALOG_VERSION, "RMBH-2026-09-v7-launch");
+  assert.equal(v4.catalog.length, 111);
+  assert.equal(v4.catalog.filter(service => service.category === "MONTAGEM E INSTALAÇÃO").length, 18);
 });
 
 test("V6 segue candidata DRAFT e ausente do build público", () => {

@@ -16,10 +16,10 @@ const expectedPopularServices = [
   ["RP0003", "Instalação de interruptor"],
   ["RP0012", "Reparo em curto-circuito"],
   ["RP0013", "Revisão elétrica de circuito"],
-  ["RP0014", "Instalação de torneira"]
+  ["RP0014", "Instalação simples de torneira em ponto existente"]
 ];
 
-test("cards populares carregam os códigos oficiais V4 esperados", () => {
+test("cards populares carregam os códigos oficiais V7 esperados", () => {
   for (const [code, name] of expectedPopularServices) {
     assert.equal(catalog.getServiceByCode(code)?.name, name);
     assert.ok(catalog.catalog.slice(0, 14).some(service => service.code === code));
@@ -40,7 +40,7 @@ test("seleção mantém serviceCode, preço FIXED, QUOTE e Continuar disponívei
   const quote = catalog.getServiceByCode("RP0012");
   assert.deepEqual(
     { code: fixed.code, mode: fixed.pricingMode, price: fixed.customerPriceCents },
-    { code: "RP0001", mode: "FIXED", price: 15000 }
+    { code: "RP0001", mode: "FIXED", price: 14990 }
   );
   assert.deepEqual(
     { code: quote.code, mode: quote.pricingMode, price: quote.customerPriceCents },
