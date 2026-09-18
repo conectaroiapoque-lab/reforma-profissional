@@ -64,10 +64,10 @@ function createHarness() {
   add("empty-tracking"); add("tracking-content"); add("tracking-protocol"); add("map-address"); add("map-status"); add("status-timeline"); add("payment-panel"); add("provider-whatsapp"); add("notifications-list"); add("success-protocol"); add("success-whatsapp");
   const trust = new FakeElement();
   const form = add("request-form");
-  for (const name of ["description", "schedule", "address", "number", "complement", "neighborhood", "city", "reference", "latitude", "longitude", "locationAccuracy", "locationTimestamp", "name", "whatsapp"]) form[name] = new FakeElement();
+  for (const name of ["description", "schedule", "address", "number", "complement", "neighborhood", "city", "postalCode", "reference", "latitude", "longitude", "locationAccuracy", "locationTimestamp", "name", "whatsapp"]) form[name] = new FakeElement();
   form.terms = { checked: false };
   form.reset = () => {
-    for (const name of ["description", "schedule", "address", "number", "complement", "neighborhood", "city", "reference", "latitude", "longitude", "locationAccuracy", "locationTimestamp", "name", "whatsapp"]) form[name].value = "";
+    for (const name of ["description", "schedule", "address", "number", "complement", "neighborhood", "city", "postalCode", "reference", "latitude", "longitude", "locationAccuracy", "locationTimestamp", "name", "whatsapp"]) form[name].value = "";
     form.terms.checked = false;
   };
 

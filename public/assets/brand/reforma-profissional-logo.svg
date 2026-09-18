@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 240" role="img" aria-labelledby="title desc">
+  <title id="title">Reforma Profissional</title><desc id="desc">App da Reforma à Construção</desc>
+  <rect width="640" height="240" rx="24" fill="#fff"/>
+  <path d="M44 103 120 42l76 61v83H44z" fill="none" stroke="#0759bd" stroke-width="18" stroke-linejoin="round"/>
+  <path d="m45 101 76-60" stroke="#e5a000" stroke-width="18" stroke-linecap="round"/>
+  <path d="m91 157 62-62m-12-7 20 20m-82 38 22 22" stroke="#0759bd" stroke-width="14" stroke-linecap="round"/>
+  <path d="M178 70q42 22 0 45" fill="none" stroke="#e5a000" stroke-width="10" stroke-linecap="round"/>
+  <text x="225" y="105" fill="#062e70" font-family="Arial,sans-serif" font-size="55" font-weight="800">Reforma</text>
+  <text x="225" y="163" fill="#087ce0" font-family="Arial,sans-serif" font-size="51" font-weight="800">Profissional</text>
+  <path d="M225 186h42m305 0h42" stroke="#e5a000" stroke-width="6" stroke-linecap="round"/>
+  <text x="278" y="195" fill="#062e70" font-family="Arial,sans-serif" font-size="19">App da Reforma à Construção</text>
+</svg>
