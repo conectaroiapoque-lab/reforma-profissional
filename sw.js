@@ -1,9 +1,9 @@
-const CACHE_NAME = "reforma-profissional-v15-go-live";
+const CACHE_NAME = "reforma-profissional-v16-production-fix";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=4",
-  "./app.js?v=11",
+  "./styles.css?v=5",
+  "./app.js?v=12",
   "./landing-pages.css?v=1",
   "./landing-pages.js?v=1",
   "./eletricista-bh/",
@@ -20,8 +20,39 @@ const APP_SHELL = [
   "./assets/brand/reforma-profissional-mark.svg"
 ];
 
+function expectedContentType(url) {
+  const pathname = new URL(url, self.location.origin).pathname;
+  if (pathname.endsWith(".css")) return /^text\/css(?:;|$)/i;
+  if (pathname.endsWith(".js")) return /^(?:text|application)\/javascript(?:;|$)/i;
+  if (pathname.endsWith(".svg")) return /^image\/svg\+xml(?:;|$)/i;
+  if (pathname.endsWith(".webmanifest")) return /^(?:application\/manifest\+json|application\/json)(?:;|$)/i;
+  if (pathname.endsWith("/") || pathname.endsWith(".html")) return /^text\/html(?:;|$)/i;
+  return null;
+}
+
+function isCacheable(request, response) {
+  if (!response.ok || response.redirected) return false;
+  const expected = expectedContentType(request.url || request);
+  return !expected || expected.test(response.headers.get("content-type") || "");
+}
+
+async function fetchValidated(request) {
+  const response = await fetch(request, { cache: "reload" });
+  if (!isCacheable(request, response)) {
+    throw new Error(`Invalid app-shell response: ${request.url || request}`);
+  }
+  return response;
+}
+
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await Promise.all(APP_SHELL.map(async asset => {
+      const request = new Request(asset, { cache: "reload" });
+      const response = await fetchValidated(request);
+      await cache.put(request, response);
+    }));
+  })());
   self.skipWaiting();
 });
 
@@ -37,12 +68,16 @@ self.addEventListener("fetch", event => {
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        if (response.ok && ["document", "script", "style", "image", "manifest"].includes(event.request.destination)) {
+        if (isCacheable(event.request, response) && ["document", "script", "style", "image", "manifest"].includes(event.request.destination)) {
           const copy = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
         }
         return response;
       })
-      .catch(() => caches.match(event.request).then(cached => cached || caches.match("./index.html")))
+      .catch(() => caches.match(event.request).then(cached => {
+        if (cached) return cached;
+        if (event.request.destination === "document") return caches.match("./index.html");
+        return Response.error();
+      }))
   );
 });

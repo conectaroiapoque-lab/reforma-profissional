@@ -2,12 +2,17 @@
 const fs=require("node:fs"),path=require("node:path");
 const root=path.resolve(__dirname,".."),out=path.join(root,"dist");
 /* Public artifacts are deny-by-default. Server/domain code must never be added here. */
-const entries=["catalog.js","styles.css","landing-pages.css","landing-pages.js","manifest.webmanifest","sw.js","robots.txt","sitemap.xml","icons","public/assets","public/legal","solicitar-servico","eletricista-bh","bombeiro-hidraulico-bh","ar-condicionado-bh","pedreiro-bh","marido-de-aluguel-bh"];
+const entries=["catalog.js","styles.css","landing-pages.css","landing-pages.js","manifest.webmanifest","sw.js","robots.txt","sitemap.xml","icons","public/legal","solicitar-servico","eletricista-bh","bombeiro-hidraulico-bh","ar-condicionado-bh","pedreiro-bh","marido-de-aluguel-bh"];
 fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});
 for(const entry of entries){const source=path.join(root,entry);if(fs.existsSync(source))fs.cpSync(source,path.join(out,entry),{recursive:true});}
+fs.cpSync(path.join(root,"public","assets"),path.join(out,"assets"),{recursive:true});
 fs.copyFileSync(path.join(root,"web","app.js"),path.join(out,"app.js"));
 fs.copyFileSync(path.join(root,"web","index.html"),path.join(out,"index.html"));
 fs.cpSync(path.join(root,"public",".well-known"),path.join(out,".well-known"),{recursive:true});
+for(const file of ["index.html","styles.css","app.js","sw.js","manifest.webmanifest"]){
+  const built=path.join(out,file);
+  if(!fs.existsSync(built)||fs.statSync(built).size===0)throw new Error(`Incomplete web build: ${file}`);
+}
 function escape(value){return value.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");}
 function inline(value){return escape(value).replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>");}
 function renderMarkdown(source){return source.split(/\r?\n/).filter(line=>line&&!line.startsWith("- **")).map(line=>line.startsWith("# ")?`<h1>${inline(line.slice(2))}</h1>`:line.startsWith("## ")?`<h2>${inline(line.slice(3))}</h2>`:line.startsWith("> ")?`<p class="meta">${inline(line.slice(2))}</p>`:`<p>${inline(line)}</p>`).join("\n");}
