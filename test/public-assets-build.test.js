@@ -38,11 +38,14 @@ test("production build publishes one synchronized HTML, CSS, JavaScript and serv
   const jsVersion = html.match(/app\.js\?v=(\d+)/)?.[1];
   assert.ok(cssVersion, "index.html must version styles.css");
   assert.ok(jsVersion, "index.html must version app.js");
-  assert.match(sw, new RegExp(`\\./styles\\.css\\?v=${cssVersion}(?:"|')`), "service worker must precache the HTML CSS version");
-  assert.match(sw, new RegExp(`\\./app\\.js\\?v=${jsVersion}(?:"|')`), "service worker must precache the HTML JS version");
+  assert.match(sw, new RegExp(`"/styles\\.css\\?v=${cssVersion}"`), "service worker must precache the exact HTML CSS version");
+  assert.match(sw, new RegExp(`"/app\\.js\\?v=${jsVersion}"`), "service worker must precache the exact HTML JS version");
   assert.match(css, /\.hero\s*\{/);
   assert.match(css, /\.btn\s*\{/);
   assert.match(css, /@media\s*\(/);
+  assert.doesNotMatch(html, /(?:href|src)="(?:\.\/)?(?:styles\.css|app\.js)/, "production assets must use root-absolute URLs");
+  assert.equal(fs.existsSync(path.join(dist, "public", "assets", "brand")), false, "assets must not be nested below dist/public");
+  assert.notDeepEqual(fs.readFileSync(path.join(root, "index.html")), fs.readFileSync(path.join(dist, "index.html")), "legacy root index.html must never enter dist");
 
   const publicOutput = expectedCopies.map(([, output]) => fs.readFileSync(path.join(dist, output), "utf8")).join("\n");
   for (const stale of ["João Técnico", "25 min", "328 atendimentos", "IA simulada", "pagamento demonstrativo"])
