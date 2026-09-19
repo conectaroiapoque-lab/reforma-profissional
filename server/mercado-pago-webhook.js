@@ -1,0 +1,6 @@
+"use strict";
+const crypto=require("node:crypto");
+function parseSignature(value=""){return Object.fromEntries(value.split(",").map(part=>part.trim().split("=")).filter(pair=>pair.length===2));}
+function verifySignature({signature,requestId,dataId,secret,now=Date.now(),toleranceMs=300000}){if(!secret)return false;const {ts,v1}=parseSignature(signature);if(!/^\d+$/.test(ts||"")||!/^[a-f0-9]{64}$/.test(v1||"")||Math.abs(now-Number(ts)*1000)>toleranceMs)return false;const manifest=`id:${String(dataId).toLowerCase()};request-id:${requestId};ts:${ts};`,expected=crypto.createHmac("sha256",secret).update(manifest).digest();const supplied=Buffer.from(v1,"hex");return supplied.length===expected.length&&crypto.timingSafeEqual(supplied,expected);}
+async function processWebhook({headers,body,repository,secret=process.env.MERCADO_PAGO_WEBHOOK_SECRET}){const requestId=headers["x-request-id"],dataId=body?.data?.id;if(!requestId||!dataId||!verifySignature({signature:headers["x-signature"],requestId,dataId,secret}))throw Object.assign(new Error("INVALID_WEBHOOK_SIGNATURE"),{statusCode:401});const eventId=String(body.id||`${body.type}:${dataId}`);return repository.recordOnce(eventId,{eventId,type:body.type,dataId:String(dataId),receivedAt:new Date().toISOString()});}
+module.exports={parseSignature,verifySignature,processWebhook};
