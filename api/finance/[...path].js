@@ -1,0 +1,3 @@
+"use strict";
+const {financeHandler}=require("../../server/privileged-api"),{fiscalReviewHandler}=require("../../server/operations-api"),repository=require("../../server/production-repository-proxy"),{pathSegments,resolveOperationalPath,routeRequest}=require("../../server/api-path"),{send}=require("../../server/http");
+module.exports=async function handler(req,res){const route=resolveOperationalPath("finance",pathSegments(req));if(!route)return send(res,404,{error:"NOT_FOUND"});return route.route==="orders"?financeHandler({repository})(req,res):fiscalReviewHandler({repository})(routeRequest(req,route),res);};
