@@ -77,7 +77,7 @@ os caminhos publicados no manifest não devem ser alterados para `.png`.
 1. Importe este repositório no painel da Vercel.
 2. Selecione a branch `main` e o diretório raiz do projeto.
 3. Em **Framework Preset**, escolha **Other**.
-4. Deixe **Build Command** vazio e defina **Output Directory** como `.`.
+4. Confirme **Build Command** como `npm run build:web` e **Output Directory** como `dist` (ambos também estão declarados em `vercel.json`).
 5. Clique em **Deploy**.
 
 Também é possível usar a CLI (`vercel` e depois `vercel --prod`), mas ela é opcional. Todos os caminhos são relativos e compatíveis com hospedagem estática.
