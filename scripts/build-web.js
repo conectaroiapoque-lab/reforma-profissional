@@ -1,5 +1,5 @@
 "use strict";
-const fs=require("node:fs"),path=require("node:path");
+const fs=require("node:fs"),path=require("node:path"),{execFileSync}=require("node:child_process");
 const root=path.resolve(__dirname,".."),out=path.join(root,"dist");
 /* Public artifacts are deny-by-default. Server/domain code must never be added here. */
 const entries=["catalog.js","styles.css","landing-pages.css","landing-pages.js","manifest.webmanifest","sw.js","robots.txt","sitemap.xml","icons","public/legal","solicitar-servico","eletricista-bh","bombeiro-hidraulico-bh","ar-condicionado-bh","pedreiro-bh","marido-de-aluguel-bh"];
@@ -9,6 +9,12 @@ fs.cpSync(path.join(root,"public","assets"),path.join(out,"assets"),{recursive:t
 fs.copyFileSync(path.join(root,"web","app.js"),path.join(out,"app.js"));
 fs.copyFileSync(path.join(root,"web","index.html"),path.join(out,"index.html"));
 fs.cpSync(path.join(root,"public",".well-known"),path.join(out,".well-known"),{recursive:true});
+const releaseSource=process.env.VERCEL_GIT_COMMIT_SHA||execFileSync("git",["rev-parse","HEAD"],{cwd:root,encoding:"utf8"}).trim();
+if(!/^[0-9a-f]{7,40}$/i.test(releaseSource))throw new Error("Release identifier must be a Git commit SHA");
+const release=releaseSource.slice(0,7).toLowerCase(),indexPath=path.join(out,"index.html");
+const releaseHtml=fs.readFileSync(indexPath,"utf8").replaceAll("__RP_RELEASE__",release);
+if(!releaseHtml.includes(`<meta name="rp-release" content="${release}">`))throw new Error("Production HTML must contain the release marker");
+fs.writeFileSync(indexPath,releaseHtml);
 for(const file of ["index.html","styles.css","app.js","sw.js","manifest.webmanifest"]){
   const built=path.join(out,file);
   if(!fs.existsSync(built)||fs.statSync(built).size===0)throw new Error(`Incomplete web build: ${file}`);
@@ -27,4 +33,4 @@ buildLegal({route:"prestador",file:"provider-service-agreement-v1.md",title:"Con
 const app=require(path.join(root,"config","app-config"));
 const association=path.join(out,".well-known","apple-app-site-association");
 fs.writeFileSync(association,fs.readFileSync(association,"utf8").replace("APP_BUNDLE_ID",app.iosBundleId));
-console.log(`Web build ready: ${out}`);
+console.log(`Web build ready: ${out} (release ${release})`);

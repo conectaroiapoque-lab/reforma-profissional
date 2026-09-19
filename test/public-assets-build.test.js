@@ -21,7 +21,12 @@ test("production build publishes one synchronized HTML, CSS, JavaScript and serv
     const built = path.join(dist, output);
     assert.ok(fs.existsSync(built), `${output} must exist in dist`);
     assert.ok(fs.statSync(built).size > 0, `${output} must not be empty`);
-    assert.deepEqual(fs.readFileSync(built), fs.readFileSync(path.join(root, source)), `${output} must match its source`);
+    if (output === "index.html") {
+      const sourceHtml=fs.readFileSync(path.join(root,source),"utf8"),builtHtml=fs.readFileSync(built,"utf8");
+      assert.equal(builtHtml.replace(/content="[0-9a-f]{7}"/, 'content="__RP_RELEASE__"'),sourceHtml,"index.html must differ only by its build release marker");
+    } else {
+      assert.deepEqual(fs.readFileSync(built), fs.readFileSync(path.join(root, source)), `${output} must match its source`);
+    }
   }
   for (const asset of [
     "manifest.webmanifest",
