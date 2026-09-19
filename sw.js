@@ -1,4 +1,4 @@
-const CACHE_NAME = "reforma-profissional-v14";
+const CACHE_NAME = "reforma-profissional-v15-go-live";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -33,7 +33,7 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
-  if (url.origin !== self.location.origin || url.pathname.startsWith("/api/")) return;
+  if (url.origin !== self.location.origin || url.pathname.startsWith("/api/") || /\/(admin|finance|private|antecedentes|sessao)\b/.test(url.pathname)) return;
   event.respondWith(
     fetch(event.request)
       .then(response => {

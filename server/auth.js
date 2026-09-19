@@ -1,7 +1,7 @@
 "use strict";
 const crypto=require("node:crypto");
-const ROLES=Object.freeze(["CUSTOMER","PROVIDER","ATTENDANT","ADMIN","FINANCE"]);
-const PERMISSIONS=Object.freeze({CUSTOMER:["ORDER_CREATE","OWN_ORDER_READ"],PROVIDER:["OWN_OFFER_READ","OWN_PAYOUT_READ"],ATTENDANT:["OPERATIONS_READ"],ADMIN:["ADMIN_READ","ADMIN_WRITE"],FINANCE:["FINANCE_READ"]});
+const ROLES=Object.freeze(["CUSTOMER","PROVIDER","ATTENDANT","ADMIN","FINANCE","ADMIN_COMPLIANCE","ADMIN_SECURITY"]);
+const PERMISSIONS=Object.freeze({CUSTOMER:["ORDER_CREATE","OWN_ORDER_READ","OWN_FILE_WRITE","LEGAL_ACCEPT"],PROVIDER:["OWN_OFFER_READ","OWN_PAYOUT_READ","OWN_FILE_WRITE","OWN_FILE_READ","LEGAL_ACCEPT"],ATTENDANT:["OPERATIONS_READ"],ADMIN:["ADMIN_READ","ADMIN_WRITE"],FINANCE:["FINANCE_READ"],ADMIN_COMPLIANCE:["COMPLIANCE_DOCUMENT_READ"],ADMIN_SECURITY:["COMPLIANCE_DOCUMENT_READ"]});
 const b64=v=>Buffer.from(v).toString("base64url");
 function secret(value=process.env.AUTH_SESSION_SECRET){if(!value||value.length<32)throw new Error("AUTH_SESSION_SECRET_NOT_CONFIGURED");return value;}
 function signSession(claims,{secretValue,now=Math.floor(Date.now()/1000),ttlSeconds=900}={}){if(!ROLES.includes(claims.role)||!claims.sub)throw new TypeError("INVALID_SESSION_CLAIMS");const header=b64(JSON.stringify({alg:"HS256",typ:"JWT"}));const payload=b64(JSON.stringify({sub:claims.sub,role:claims.role,permissions:claims.permissions||PERMISSIONS[claims.role],iat:now,exp:now+ttlSeconds}));const signature=crypto.createHmac("sha256",secret(secretValue)).update(`${header}.${payload}`).digest("base64url");return`${header}.${payload}.${signature}`;}
