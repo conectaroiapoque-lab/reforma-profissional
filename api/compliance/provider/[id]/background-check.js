@@ -1,0 +1,1 @@
+"use strict";const {reviewHandler}=require("../../../../server/compliance-service"),productionRepository=require("../../../../server/production-repository-proxy");module.exports=(req,res)=>reviewHandler({repository:productionRepository})(req,res);

@@ -1,0 +1,1 @@
+"use strict";const {fiscalReviewHandler}=require("../../../../server/operations-api"),productionRepository=require("../../../../server/production-repository-proxy");module.exports=(req,res)=>fiscalReviewHandler({repository:productionRepository})(req,res);

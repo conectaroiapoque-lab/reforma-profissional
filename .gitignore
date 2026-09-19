@@ -1,5 +1,6 @@
 node_modules/
 dist/
+backups/
 .DS_Store
 ios/App/Pods/
 ios/App/DerivedData/

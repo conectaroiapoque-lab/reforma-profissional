@@ -1,0 +1,1 @@
+"use strict";const {providerHandler}=require("../../server/operations-api"),productionRepository=require("../../server/production-repository-proxy");module.exports=(req,res)=>providerHandler({repository:productionRepository})(Object.assign(req,{route:"orders"}),res);
