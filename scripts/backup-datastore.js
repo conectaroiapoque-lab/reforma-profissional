@@ -1,0 +1,3 @@
+#!/usr/bin/env node
+"use strict";const fs=require("node:fs"),path=require("node:path"),{RedisRestClient,exportKeyPatterns}=require("./datastore-backup-lib");
+(async()=>{const patterns=(process.env.BACKUP_KEY_PATTERNS||"order:*,order-idempotency:*,orders,provider:*,providers,private-file:*").split(",").map(v=>v.trim()).filter(Boolean),backup=await exportKeyPatterns(new RedisRestClient(),patterns),output=process.argv[2]||path.join("backups",`production-${Date.now()}.json`);fs.mkdirSync(path.dirname(output),{recursive:true});fs.writeFileSync(output,JSON.stringify(backup,null,2),{mode:0o600,flag:"wx"});console.log(JSON.stringify({output,patterns,records:backup.records.length,checksum:backup.checksum}));})().catch(error=>{console.error(error.message);process.exitCode=1;});

@@ -2,7 +2,7 @@
   "name": "reforma-profissional",
   "private": true,
   "scripts": {
-    "test": "node --test",
+    "test": "node --test --test-concurrency=1",
     "build": "npm run build:web",
     "build:web": "node scripts/build-web.js",
     "sync:android": "npm run build:web && cap sync android",

@@ -10,3 +10,9 @@
 6. Registrar auditoria sem expor documento ou perfil tributário às visões indevidas.
 
 MEI e demais PJ/PF não compartilham regra por conveniência. A exigência candidata para ME/EPP em 2026-11-01 permanece inativa até validação da fonte oficial e da contabilidade.
+
+## Decisão de lançamento
+
+**AUTOMAÇÃO NFS-e = POST-LAUNCH.** A integração automática com prefeitura não é requisito do lançamento inicial.
+
+**FLUXO MANUAL VALIDADO = GO-LIVE.** O prestador informa tipo, número, data, valor, emissor, tomador e `evidenceId`; o documento fica `FISCAL_DOCUMENT_SUBMITTED` até revisão por Finance. Rejeição exige correção. O repasse só fica `READY` após `FISCAL_DOCUMENT_APPROVED`.
