@@ -1,9 +1,9 @@
-const CACHE_NAME = "reforma-profissional-v17-brand";
+const CACHE_NAME = "reforma-profissional-v18-pr30-production-fix";
 const APP_SHELL = [
-  "./",
-  "./index.html",
-  "./styles.css?v=6",
-  "./app.js?v=12",
+  "/",
+  "/index.html",
+  "/styles.css?v=7",
+  "/app.js?v=13",
   "./landing-pages.css?v=1",
   "./landing-pages.js?v=1",
   "./eletricista-bh/",
@@ -57,7 +57,7 @@ self.addEventListener("install", event => {
 });
 
 self.addEventListener("activate", event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))));
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith("reforma-profissional-") && key !== CACHE_NAME).map(key => caches.delete(key)))));
   self.clients.claim();
 });
 
@@ -76,7 +76,7 @@ self.addEventListener("fetch", event => {
       })
       .catch(() => caches.match(event.request).then(cached => {
         if (cached) return cached;
-        if (event.request.destination === "document") return caches.match("./index.html");
+        if (event.request.destination === "document") return caches.match("/index.html");
         return Response.error();
       }))
   );

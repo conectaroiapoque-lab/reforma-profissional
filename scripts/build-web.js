@@ -13,6 +13,11 @@ for(const file of ["index.html","styles.css","app.js","sw.js","manifest.webmanif
   const built=path.join(out,file);
   if(!fs.existsSync(built)||fs.statSync(built).size===0)throw new Error(`Incomplete web build: ${file}`);
 }
+const builtHtml=fs.readFileSync(path.join(out,"index.html"),"utf8");
+for(const match of builtHtml.matchAll(/(?:href|src)="\/(styles\.css|app\.js)\?v=\d+"/g)){
+  if(!fs.existsSync(path.join(out,match[1])))throw new Error(`HTML references missing production asset: ${match[1]}`);
+}
+if(!builtHtml.includes('href="/styles.css?v=')||!builtHtml.includes('src="/app.js?v='))throw new Error("Production HTML must use root-absolute, versioned CSS and JavaScript URLs");
 function escape(value){return value.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");}
 function inline(value){return escape(value).replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>");}
 function renderMarkdown(source){return source.split(/\r?\n/).filter(line=>line&&!line.startsWith("- **")).map(line=>line.startsWith("# ")?`<h1>${inline(line.slice(2))}</h1>`:line.startsWith("## ")?`<h2>${inline(line.slice(3))}</h2>`:line.startsWith("> ")?`<p class="meta">${inline(line.slice(2))}</p>`:`<p>${inline(line)}</p>`).join("\n");}
