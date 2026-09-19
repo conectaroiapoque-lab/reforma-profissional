@@ -16,8 +16,8 @@ test("Home mantém o hero limpo, sem destaque separado de marido de aluguel", ()
     const hero = html.match(/<section class="hero"[\s\S]*?<\/section>/)?.[0] || "";
     assert.doesNotMatch(hero, /quick-services-highlight/);
     assert.doesNotMatch(hero, /MONTAGEM \/ INSTALAÇÃO \/ MARIDO DE ALUGUEL/);
-    assert.match(hero, /Solicitar Serviço Agora/);
-    assert.match(hero, /Acompanhar Serviço/);
+    assert.match(hero, /Solicitar (?:Serviço Agora|serviço)/);
+    assert.match(hero, /Acompanhar [Ss]erviço/);
     assert.match(hero, /Falar no WhatsApp/);
   }
 });
