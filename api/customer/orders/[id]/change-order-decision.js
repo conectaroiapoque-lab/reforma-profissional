@@ -1,1 +1,0 @@
-"use strict";const {customerHandler}=require("../../../../server/operations-api"),productionRepository=require("../../../../server/production-repository-proxy");module.exports=(req,res)=>customerHandler({repository:productionRepository})(Object.assign(req,{action:"change-order-decision"}),res);

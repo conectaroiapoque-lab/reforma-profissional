@@ -34,7 +34,7 @@ H-01 fica `EXTERNAL_VALIDATION_REQUIRED`, e não FAIL: o proxy deste ambiente re
 
 ## Validações executadas
 
-- `npm test`: 193 total, 193 pass, 0 fail.
+- `npm test`: 196 total, 196 pass, 0 fail.
 - `npm run build:web`: PASS.
 - `node --check` em todo JavaScript versionável: PASS.
 - `git diff --check`: PASS.
@@ -43,7 +43,7 @@ H-01 fica `EXTERNAL_VALIDATION_REQUIRED`, e não FAIL: o proxy deste ambiente re
 - Busca de payload privado em `dist`: limpa.
 - Busca de PDF/DOC/DOCX/Markdown/source map em `dist`: limpa.
 - Harness mobile existente cobre estrutura responsiva; não houve alteração visual. Browser/dispositivo real de 360/390/412 px e Android real: `NOT_TESTABLE_IN_ENVIRONMENT`.
-- Vercel CLI/credenciais ausentes: preview `NOT_AVAILABLE`.
+- Correção da PR #27 consolidou 33 Functions em 11; novo preview Vercel: `AGUARDANDO` após o push do commit corretivo.
 
 ## Dependências externas e decisão fiscal
 

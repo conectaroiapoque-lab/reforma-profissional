@@ -1,1 +1,0 @@
-"use strict";const {adminHandler}=require("../../../server/operations-api"),productionRepository=require("../../../server/production-repository-proxy");module.exports=(req,res)=>adminHandler({repository:productionRepository})(Object.assign(req,{route:"provider"}),res);
