@@ -50,7 +50,7 @@ test("número fixo não é usado como WhatsApp em nenhum arquivo de produção",
   const combined = productionFiles.map(file => read(file)).join("\n");
   assert.doesNotMatch(combined, /wa\.me\/553125102500/);
   assert.doesNotMatch(combined, /WHATSAPP_NUMBER\s*=\s*["']553125102500/);
-  assert.match(read("web/index.html"), /href="tel:\+553125102500"[^>]*>Atendimento: \(31\) 2510-2500<\/a>/);
+  assert.match(read("web/index.html"), /href="https:\/\/wa\.me\/5531990102500"[^>]*>WhatsApp: \(31\) 99010-2500<\/a>/);
 });
 
 test("Google Ads e a atualização do cache permanecem intactos", () => {
