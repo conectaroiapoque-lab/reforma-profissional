@@ -39,7 +39,7 @@ test("dist serves the PR 30 release with correct asset MIME types", async t => {
   const expected = [
     ["/", "text/html"],
     ["/styles.css", "text/css"],
-    ["/styles.css?v=7", "text/css"],
+    ["/styles.css?v=6", "text/css"],
     ["/app.js?v=13", "javascript"],
     ["/sw.js", "javascript"],
     ["/manifest.webmanifest", "application/manifest+json"],
@@ -56,9 +56,9 @@ test("dist serves the PR 30 release with correct asset MIME types", async t => {
   }
 
   const html = await (await fetch(`${origin}/`)).text();
-  assert.match(html, /href="\/styles\.css\?v=7"/);
+  assert.match(html, /href="\/styles\.css\?v=6"/);
   assert.match(html, /src="\/app\.js\?v=13"/);
-  assert.notDeepEqual(fs.readFileSync(path.join(root, "index.html")), fs.readFileSync(path.join(dist, "index.html")), "legacy root HTML entered dist");
+  assert.equal(fs.existsSync(path.join(root, "index.html")), false, "legacy root HTML must not exist");
   assert.equal(fs.existsSync(path.join(dist, "public", "assets", "brand")), false, "brand assets were nested below dist/public");
 });
 
@@ -87,7 +87,7 @@ test("service worker deletes only old Reforma caches and rejects wrong asset con
   listeners.activate({ waitUntil(promise) { activation = promise; } });
   await activation;
   assert.deepEqual(deleted.sort(), ["reforma-profissional-v15-go-live", "reforma-profissional-v16-production-fix", "reforma-profissional-v17-brand"]);
-  assert.equal(context.isCacheable("/styles.css?v=7", await context.fetch()), false);
+  assert.equal(context.isCacheable("/styles.css?v=6", await context.fetch()), false);
   assert.equal(context.isCacheable("/app.js?v=13", await context.fetch()), false);
   assert.match(source, /response\.ok/);
   assert.match(source, /response\.redirected/);

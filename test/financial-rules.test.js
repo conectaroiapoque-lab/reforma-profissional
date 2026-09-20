@@ -67,13 +67,10 @@ test("ordem profissional não revela contato nem endereço antes da autorizaçã
   for (const key of ["phone", "whatsapp", "email", "address", "serviceLocation"]) assert.equal(key in order, false);
 });
 
-test("interface conecta orçamento aprovado e renderiza todas as 12 opções", () => {
-  const html = fs.readFileSync(new URL("../index.html", `file://${__dirname}/`), "utf8");
-  const app = fs.readFileSync(new URL("../app.js", `file://${__dirname}/`), "utf8");
+test("interface mantém pagamento desativado e motor preserva todas as 12 opções", () => {
+  const html = fs.readFileSync(new URL("../web/index.html", `file://${__dirname}/`), "utf8");
   assert.match(html, /id="payment-panel"/);
-  assert.match(html, /PIX/);
-  assert.match(html, /Cartão de débito/);
-  assert.match(html, /id="installment-options"/);
-  assert.match(app, /methods\.credit\.map/);
+  assert.match(html, /Pagamento eletrônico em ativação/);
+  assert.doesNotMatch(html, /id="installment-options"/);
   assert.equal(payments.calculateInstallmentOptions(1000).map(x => x.displayText).length, 12);
 });

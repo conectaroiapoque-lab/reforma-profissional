@@ -23,7 +23,9 @@ test("production build publishes one synchronized HTML, CSS, JavaScript and serv
     assert.ok(fs.statSync(built).size > 0, `${output} must not be empty`);
     if (output === "index.html") {
       const sourceHtml=fs.readFileSync(path.join(root,source),"utf8"),builtHtml=fs.readFileSync(built,"utf8");
-      assert.equal(builtHtml.replace(/content="[0-9a-f]{7}"/, 'content="__RP_RELEASE__"'),sourceHtml,"index.html must differ only by its build release marker");
+      const release = builtHtml.match(/<meta name="rp-release" content="([0-9a-f]{7})">/)?.[1];
+      assert.ok(release, "built index.html must expose its short SHA");
+      assert.equal(builtHtml.replaceAll(release, "__RP_RELEASE__"),sourceHtml,"index.html must differ only by its build release markers");
     } else {
       assert.deepEqual(fs.readFileSync(built), fs.readFileSync(path.join(root, source)), `${output} must match its source`);
     }
@@ -50,7 +52,7 @@ test("production build publishes one synchronized HTML, CSS, JavaScript and serv
   assert.match(css, /@media\s*\(/);
   assert.doesNotMatch(html, /(?:href|src)="(?:\.\/)?(?:styles\.css|app\.js)/, "production assets must use root-absolute URLs");
   assert.equal(fs.existsSync(path.join(dist, "public", "assets", "brand")), false, "assets must not be nested below dist/public");
-  assert.notDeepEqual(fs.readFileSync(path.join(root, "index.html")), fs.readFileSync(path.join(dist, "index.html")), "legacy root index.html must never enter dist");
+  assert.equal(fs.existsSync(path.join(root, "index.html")), false, "legacy root index.html must not exist");
 
   const publicOutput = expectedCopies.map(([, output]) => fs.readFileSync(path.join(dist, output), "utf8")).join("\n");
   for (const stale of ["João Técnico", "25 min", "328 atendimentos", "IA simulada", "pagamento demonstrativo"])
