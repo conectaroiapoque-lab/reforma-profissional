@@ -11,7 +11,7 @@ const root = path.join(__dirname, "..");
 const read = file => fs.readFileSync(path.join(root, file), "utf8");
 
 test("Home mantém o hero limpo, sem destaque separado de marido de aluguel", () => {
-  for (const file of ["index.html", "web/index.html"]) {
+  for (const file of ["web/index.html"]) {
     const html = read(file);
     const hero = html.match(/<section class="hero"[\s\S]*?<\/section>/)?.[0] || "";
     assert.doesNotMatch(hero, /quick-services-highlight/);

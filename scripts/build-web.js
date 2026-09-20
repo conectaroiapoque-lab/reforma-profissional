@@ -13,7 +13,7 @@ const releaseSource=process.env.VERCEL_GIT_COMMIT_SHA||execFileSync("git",["rev-
 if(!/^[0-9a-f]{7,40}$/i.test(releaseSource))throw new Error("Release identifier must be a Git commit SHA");
 const release=releaseSource.slice(0,7).toLowerCase(),indexPath=path.join(out,"index.html");
 const releaseHtml=fs.readFileSync(indexPath,"utf8").replaceAll("__RP_RELEASE__",release);
-if(!releaseHtml.includes(`<meta name="rp-release" content="${release}">`))throw new Error("Production HTML must contain the release marker");
+if(!releaseHtml.includes(`<meta name="rp-build" content="go-live-main-${release}">`)||!releaseHtml.includes(`<!-- RP_BUILD:${release} -->`))throw new Error("Production HTML must contain both build markers");
 fs.writeFileSync(indexPath,releaseHtml);
 for(const file of ["index.html","styles.css","app.js","sw.js","manifest.webmanifest"]){
   const built=path.join(out,file);

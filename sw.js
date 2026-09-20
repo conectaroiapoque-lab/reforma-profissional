@@ -1,8 +1,8 @@
-const CACHE_NAME = "reforma-profissional-v18-pr30-production-fix";
+const CACHE_NAME = "reforma-profissional-v17-production-recovery";
 const APP_SHELL = [
   "/",
   "/index.html",
-  "/styles.css?v=7",
+  "/styles.css?v=6",
   "/app.js?v=13",
   "./landing-pages.css?v=1",
   "./landing-pages.js?v=1",

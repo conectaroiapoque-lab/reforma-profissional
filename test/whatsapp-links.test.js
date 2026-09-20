@@ -46,15 +46,15 @@ test("cada CTA das seis landing pages aponta de fato para o WhatsApp Business", 
 });
 
 test("número fixo não é usado como WhatsApp em nenhum arquivo de produção", () => {
-  const productionFiles = ["app.js", "index.html", "landing-pages.js", ...landings.map(slug => `${slug}/index.html`)];
+  const productionFiles = ["app.js", "web/index.html", "landing-pages.js", ...landings.map(slug => `${slug}/index.html`)];
   const combined = productionFiles.map(file => read(file)).join("\n");
   assert.doesNotMatch(combined, /wa\.me\/553125102500/);
   assert.doesNotMatch(combined, /WHATSAPP_NUMBER\s*=\s*["']553125102500/);
-  assert.match(read("index.html"), /href="tel:\+553125102500"[^>]*>Atendimento: \(31\) 2510-2500<\/a>/);
+  assert.match(read("web/index.html"), /href="https:\/\/wa\.me\/5531990102500"[^>]*>WhatsApp: \(31\) 99010-2500<\/a>/);
 });
 
 test("Google Ads e a atualização do cache permanecem intactos", () => {
-  const index = read("index.html");
+  const index = read("web/index.html");
   const app = read("app.js");
   const landingScript = read("landing-pages.js");
   const worker = read("sw.js");
@@ -62,7 +62,7 @@ test("Google Ads e a atualização do cache permanecem intactos", () => {
   assert.match(index, /AW-17424041657/);
   assert.match(app, /AW-17424041657\/Rb7QCI780u4cELmNt_RA/);
   assert.match(landingScript, /AW-17424041657\/Rb7QCI780u4cELmNt_RA/);
-  assert.match(index, /src="app\.js\?v=7"/);
-  assert.match(worker, /CACHE_NAME = "reforma-profissional-v18-pr30-production-fix"/);
+  assert.match(index, /src="\/app\.js\?v=13"/);
+  assert.match(worker, /CACHE_NAME = "reforma-profissional-v17-production-recovery"/);
   assert.match(worker, /"\/app\.js\?v=13"/);
 });
