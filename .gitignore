@@ -2,6 +2,13 @@ node_modules/
 dist/
 backups/
 .DS_Store
+
+# Rebuildable mobile/store raster assets (npm run mobile:assets)
+android/**/res/**/splash.png
+android/**/res/mipmap-*/ic_launcher*.png
+android/gradle/wrapper/gradle-wrapper.jar
+ios/App/App/Assets.xcassets/**/*.png
+public/assets/brand/reforma-profissional-store-512.png
 ios/App/Pods/
 ios/App/DerivedData/
 *.xcuserstate

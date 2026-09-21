@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Reforma Profissional</string>
+    <string name="title_activity_main">Reforma Profissional</string>
+    <string name="package_name">br.com.reformaprofissional.app</string>
+    <string name="custom_url_scheme">br.com.reformaprofissional.app</string>
+</resources>

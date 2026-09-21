@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="192" android:viewportHeight="192">
+    <!-- Vector derivative of public/assets/brand/reforma-profissional-mark.svg. -->
+    <path android:fillColor="#FFFFFFFF" android:strokeColor="#FF0759BD"
+        android:strokeWidth="14" android:strokeLineJoin="round"
+        android:pathData="M29,84 L96,30 L163,84 L163,154 A12,12 0,0 1,151 166 L41,166 A12,12 0,0 1,29 154 Z" />
+    <path android:fillColor="@android:color/transparent" android:strokeColor="#FFF5AE00"
+        android:strokeWidth="14" android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M25,85 L96,27 L167,85" />
+    <path android:fillColor="@android:color/transparent" android:strokeColor="#FF0759BD"
+        android:strokeWidth="15" android:strokeLineCap="round" android:pathData="M65,143 L119,89" />
+    <path android:fillColor="#FF0759BD"
+        android:pathData="M111,76 C105,83 103,92 105,101 L120,116 C129,118 138,116 145,110 L128,102 L119,93 Z" />
+    <path android:fillColor="#FFF5AE00" android:pathData="M65,131 A12,12 0,1 0,65 155 A12,12 0,1 0,65 131" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M65,138 A5,5 0,1 0,65 148 A5,5 0,1 0,65 138" />
+</vector>

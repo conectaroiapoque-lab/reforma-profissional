@@ -5,8 +5,9 @@
     "test": "node --test --test-concurrency=1",
     "build": "npm run build:web",
     "build:web": "node scripts/build-web.js",
-    "sync:android": "npm run build:web && cap sync android",
-    "sync:ios": "npm run build:web && cap sync ios",
+    "mobile:assets": "node scripts/generate-mobile-brand-assets.js",
+    "sync:android": "npm run mobile:assets && npm run build:web && cap sync android",
+    "sync:ios": "npm run mobile:assets && npm run build:web && cap sync ios",
     "open:android": "cap open android",
     "open:ios": "cap open ios"
   },
