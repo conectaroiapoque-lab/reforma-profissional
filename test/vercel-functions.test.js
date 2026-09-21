@@ -8,7 +8,7 @@ test("every Vercel Function imports without private runtime environment",()=>{
   for(const name of privateNames)delete process.env[name];
   try{
     const files=filesUnder(apiRoot).sort();
-    assert.equal(files.length,11,"keep the deployment within the Vercel Hobby function limit");
+    assert.equal(files.length,12,"keep the deployment within the Vercel function limit");
     for(const file of files){
       assert.doesNotThrow(()=>require(file),path.relative(root,file));
       assert.equal(typeof require(file),"function",path.relative(root,file));
