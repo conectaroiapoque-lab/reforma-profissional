@@ -1,0 +1,5 @@
+"use strict";
+const test=require("node:test"),assert=require("node:assert/strict");
+const {normalizePostalCode,normalizeBrasilApi,lookupPostalCode}=require("../server/postal-code-provider");
+test("postal code provider validates and normalizes Brazilian addresses",async()=>{assert.equal(normalizePostalCode("30140-071"),"30140071");assert.throws(()=>normalizePostalCode("123"),/INVALID_POSTAL_CODE/);assert.deepEqual(normalizeBrasilApi({street:" Av. Afonso Pena ",neighborhood:"Centro",city:"Belo Horizonte",state:"mg"},"30140071"),{postalCode:"30140071",street:"Av. Afonso Pena",neighborhood:"Centro",city:"Belo Horizonte",state:"MG"});let called="";const address=await lookupPostalCode("30140-071",{fetchImpl:async url=>(called=url,{ok:true,json:async()=>({street:"Rua A",neighborhood:"Centro",city:"Belo Horizonte",state:"MG"})})});assert.match(called,/30140071$/);assert.equal(address.state,"MG");});
+test("postal code provider fails safely without exposing provider errors",async()=>{await assert.rejects(lookupPostalCode("30140071",{fetchImpl:async()=>{throw new Error("network secret")}}),error=>error.message==="POSTAL_CODE_UNAVAILABLE"&&error.statusCode===502);});
