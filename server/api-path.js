@@ -1,6 +1,6 @@
 "use strict";
 const allowed=Object.freeze({
-  admin:Object.freeze({provider:new Set(["approve","review"]),order:new Set(["assign-provider","approve-quote","authorize-service","review-change-order"])}),
+  admin:Object.freeze({provider:new Set(["approve","review","start-review","validate-document","reject-document","request-correction","suspend","reactivate","note"]),order:new Set(["assign-provider","approve-quote","authorize-service","review-change-order"])}),
   provider:new Set(["accept","decline","arrive","start","complete","quote","fiscal-document","change-order"]),
   customer:new Set(["quote-decision","change-order-decision"])
 });
@@ -20,6 +20,7 @@ function resolveOperationalPath(scope,segments){
   }
   if(scope==="provider"){
     if(!id&&["profile","opportunities","orders","background-check"].includes(resource))return{route:resource};
+    if(resource==="documents"&&id&&!action)return{route:"documents",id};
     if(resource==="orders"&&id&&allowed.provider.has(action))return{id,action};
   }
   if(scope==="customer"&&resource==="orders"&&id&&(!action||allowed.customer.has(action)))return{id,action};
