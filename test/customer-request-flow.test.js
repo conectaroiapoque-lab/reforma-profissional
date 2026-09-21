@@ -64,10 +64,10 @@ function createHarness() {
   add("empty-tracking"); add("tracking-content"); add("tracking-protocol"); add("map-address"); add("map-status"); add("status-timeline"); add("payment-panel"); add("provider-whatsapp"); add("notifications-list"); add("success-protocol"); add("success-whatsapp");
   const trust = new FakeElement();
   const form = add("request-form");
-  for (const name of ["description", "schedule", "address", "number", "complement", "neighborhood", "city", "postalCode", "reference", "latitude", "longitude", "locationAccuracy", "locationTimestamp", "name", "whatsapp"]) form[name] = new FakeElement();
+  for (const name of ["description", "schedule", "address", "number", "complement", "neighborhood", "city", "state", "postalCode", "reference", "latitude", "longitude", "locationAccuracy", "locationTimestamp", "name", "whatsapp"]) form[name] = new FakeElement();
   form.terms = { checked: false };
   form.reset = () => {
-    for (const name of ["description", "schedule", "address", "number", "complement", "neighborhood", "city", "postalCode", "reference", "latitude", "longitude", "locationAccuracy", "locationTimestamp", "name", "whatsapp"]) form[name].value = "";
+    for (const name of ["description", "schedule", "address", "number", "complement", "neighborhood", "city", "state", "postalCode", "reference", "latitude", "longitude", "locationAccuracy", "locationTimestamp", "name", "whatsapp"]) form[name].value = "";
     form.terms.checked = false;
   };
 
@@ -92,7 +92,7 @@ function createHarness() {
   ids.get("request-view").querySelectorAll = selector => selector === ".step" ? progress : [];
   global.window = { scrollTo() {}, addEventListener() {} };
   Object.defineProperty(global, "navigator", { value: {}, configurable: true });
-  global.sessionStorage = { getItem() { return null; }, setItem() {} };
+  global.sessionStorage = { getItem() { return null; }, setItem() {}, removeItem() {} };
   global.ReformaProfissionalCatalog = catalog;
 
   delete require.cache[require.resolve("../web/app")];
@@ -175,6 +175,8 @@ test("Voltar preserva serviço e Continuar percorre detalhes, endereço e confir
   Object.assign(h.form.number, { value: "123" });
   Object.assign(h.form.neighborhood, { value: "Centro" });
   Object.assign(h.form.city, { value: "Belo Horizonte" });
+  Object.assign(h.form.state, { value: "MG" });
+  Object.assign(h.form.postalCode, { value: "30110-000" });
   h.ids.get("next-step").listeners.click();
   assert.equal(activeStep(h), 4);
   assert.equal(h.ids.get("submit-request").hidden, false);

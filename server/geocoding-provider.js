@@ -12,6 +12,7 @@ function normalizeGoogleResult(result = {}) {
     number: component(components, "street_number"),
     neighborhood: component(components, "sublocality_level_1") || component(components, "neighborhood") || component(components, "sublocality"),
     city: component(components, "administrative_area_level_2") || component(components, "locality"),
+    state: component(components, "administrative_area_level_1", true),
     postalCode: component(components, "postal_code")
   };
 }
