@@ -31,15 +31,15 @@ test("catch-all Functions preserve every approved operational URL",()=>{
   assert.equal(resolveOperationalPath("provider",["orders","ORD-1","forged-action"]),null);
 });
 
-test("vercel configuration keeps supported build, output, security headers and canonical HTTPS redirect",()=>{
+test("vercel configuration delegates the canonical apex-to-www redirect to Vercel Domains",()=>{
   const config=JSON.parse(fs.readFileSync(path.join(root,"vercel.json"),"utf8"));
   assert.equal(config.buildCommand,"npm run build:web");
   assert.equal(config.outputDirectory,"dist");
   assert.equal(config.framework,null);
-  const redirect=config.redirects.find(item=>item.has?.some(condition=>condition.type==="host"&&condition.value==="www.reformaprofissional.com.br"));
-  assert.equal(redirect.source,"/:path*");
-  assert.equal(redirect.destination,"https://reformaprofissional.com.br/:path*");
-  assert.equal(redirect.permanent,true);
+  assert.equal("redirects" in config,false,"host redirects must be managed exclusively by Vercel Domains");
+  const serialized=JSON.stringify(config);
+  assert.doesNotMatch(serialized,/https:\/\/reformaprofissional\.com\.br/);
+  assert.doesNotMatch(serialized,/www\.reformaprofissional\.com\.br/);
   const headers=JSON.stringify(config.headers);
   assert.match(headers,/Strict-Transport-Security/);
   assert.match(headers,/Content-Security-Policy/);
