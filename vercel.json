@@ -42,18 +42,5 @@
         }
       ]
     }
-  ],
-  "redirects": [
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.reformaprofissional.com.br"
-        }
-      ],
-      "destination": "https://reformaprofissional.com.br/:path*",
-      "permanent": true
-    }
   ]
 }
