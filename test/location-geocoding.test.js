@@ -4,7 +4,7 @@ const {normalizeGoogleResult,reverseGeocode}=require("../server/geocoding-provid
 const reverseHandler=require("../api/geocode/reverse");
 
 function googleResult(parts){return {address_components:Object.entries(parts).map(([type,value])=>({types:[type],long_name:value,short_name:value}))};}
-test("reverse geocode normaliza rua, número, bairro, cidade e CEP",()=>{assert.deepEqual(normalizeGoogleResult(googleResult({route:"Rua A",street_number:"42",sublocality_level_1:"Centro",administrative_area_level_2:"Belo Horizonte",postal_code:"30000-000"})),{address:"Rua A",number:"42",neighborhood:"Centro",city:"Belo Horizonte",postalCode:"30000-000"});});
+test("reverse geocode normaliza rua, número, bairro, cidade e CEP",()=>{assert.deepEqual(normalizeGoogleResult(googleResult({route:"Rua A",street_number:"42",sublocality_level_1:"Centro",administrative_area_level_2:"Belo Horizonte",administrative_area_level_1:"MG",postal_code:"30000-000"})),{address:"Rua A",number:"42",neighborhood:"Centro",city:"Belo Horizonte",state:"MG",postalCode:"30000-000"});});
 test("reverse geocode parcial nunca inventa número",()=>{const value=normalizeGoogleResult(googleResult({route:"Rua Sem Número",locality:"Contagem"}));assert.equal(value.number,"");assert.equal(value.address,"Rua Sem Número");assert.equal(value.city,"Contagem");});
 test("provedor exige chave somente no servidor",async()=>{await assert.rejects(reverseGeocode({latitude:-19,longitude:-44,env:{GEOCODING_PROVIDER:"google"}}),/GEOCODING_NOT_CONFIGURED/);});
 test("falha do provedor produz fallback controlado",async()=>{await assert.rejects(reverseGeocode({latitude:-19,longitude:-44,env:{GEOCODING_PROVIDER:"google",GOOGLE_MAPS_GEOCODING_API_KEY:"test"},fetchImpl:async()=>({ok:false})}),/GEOCODING_PROVIDER_FAILED/);});
