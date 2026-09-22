@@ -1,4 +1,4 @@
-const CACHE_NAME = "reforma-profissional-v17-production-recovery";
+const CACHE_NAME = "reforma-profissional-v18-official-brand";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -17,7 +17,8 @@ const APP_SHELL = [
   "./icons/brand-icon-512.svg",
   "./icons/brand-icon-maskable-512.svg",
   "./assets/brand/reforma-profissional-logo.svg",
-  "./assets/brand/reforma-profissional-mark.svg"
+  "./assets/brand/reforma-profissional-mark.svg",
+  "./assets/brand/reforma-profissional-oficial.jpeg"
 ];
 
 function expectedContentType(url) {
@@ -25,6 +26,7 @@ function expectedContentType(url) {
   if (pathname.endsWith(".css")) return /^text\/css(?:;|$)/i;
   if (pathname.endsWith(".js")) return /^(?:text|application)\/javascript(?:;|$)/i;
   if (pathname.endsWith(".svg")) return /^image\/svg\+xml(?:;|$)/i;
+  if (/\.jpe?g$/i.test(pathname)) return /^image\/jpeg(?:;|$)/i;
   if (pathname.endsWith(".webmanifest")) return /^(?:application\/manifest\+json|application\/json)(?:;|$)/i;
   if (pathname.endsWith("/") || pathname.endsWith(".html")) return /^text\/html(?:;|$)/i;
   return null;
