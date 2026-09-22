@@ -15,6 +15,7 @@ const contentTypes = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
+  ".jpeg": "image/jpeg",
   ".svg": "image/svg+xml",
   ".webmanifest": "application/manifest+json"
 };
@@ -44,7 +45,8 @@ test("dist serves the PR 30 release with correct asset MIME types", async t => {
     ["/sw.js", "javascript"],
     ["/manifest.webmanifest", "application/manifest+json"],
     ["/assets/brand/reforma-profissional-logo.svg", "image/svg+xml"],
-    ["/assets/brand/reforma-profissional-mark.svg", "image/svg+xml"]
+    ["/assets/brand/reforma-profissional-mark.svg", "image/svg+xml"],
+    ["/assets/brand/reforma-profissional-oficial.jpeg", "image/jpeg"]
   ];
   for (const [url, type] of expected) {
     const response = await fetch(`${origin}${url}`);

@@ -33,7 +33,8 @@ test("production build publishes one synchronized HTML, CSS, JavaScript and serv
   for (const asset of [
     "manifest.webmanifest",
     "assets/brand/reforma-profissional-logo.svg",
-    "assets/brand/reforma-profissional-mark.svg"
+    "assets/brand/reforma-profissional-mark.svg",
+    "assets/brand/reforma-profissional-oficial.jpeg"
   ]) {
     assert.ok(fs.statSync(path.join(dist, asset)).size > 0, `${asset} must be published at its referenced URL`);
   }
