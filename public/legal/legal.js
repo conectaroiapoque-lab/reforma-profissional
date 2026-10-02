@@ -6,3 +6,5 @@ document.querySelector("#print").addEventListener("click",()=>window.print());
 document.querySelector("#download").addEventListener("click",()=>{const copy=document.documentElement.cloneNode(true);copy.querySelector(".actions")?.remove();const blob=new Blob(["<!doctype html>\n"+copy.outerHTML],{type:"text/html;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${document.body.dataset.version}.html`;a.click();URL.revokeObjectURL(a.href)});
 checkbox.addEventListener("change",()=>{submit.disabled=!checkbox.checked});
 submit.addEventListener("click",()=>{if(!checkbox.checked)return;const returnTo=new URLSearchParams(location.search).get("returnTo");if(returnTo?.startsWith("/")&&!returnTo.startsWith("//"))location.assign(returnTo);else history.length>1?history.back():location.assign("/")});
+
+const returnTo=new URLSearchParams(location.search).get("returnTo"),backRegistration=document.querySelector("#back-registration");if(backRegistration&&returnTo==="/prestador/cadastro/")backRegistration.hidden=false;

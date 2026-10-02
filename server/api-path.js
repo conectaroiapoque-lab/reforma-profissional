@@ -1,6 +1,6 @@
 "use strict";
 const allowed=Object.freeze({
-  admin:Object.freeze({provider:new Set(["approve","review","start-review","validate-document","reject-document","request-correction","suspend","reactivate","note"]),order:new Set(["assign-provider","approve-quote","authorize-service","review-change-order"])}),
+  admin:Object.freeze({provider:new Set(["approve","review","start-review","validate-document","reject-document","request-correction","suspend","reactivate","note","sensitive"]),order:new Set(["assign-provider","approve-quote","authorize-service","review-change-order"])}),
   provider:new Set(["accept","decline","arrive","start","complete","quote","fiscal-document","change-order"]),
   customer:new Set(["quote-decision","change-order-decision"])
 });
