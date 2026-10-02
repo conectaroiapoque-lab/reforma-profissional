@@ -2,7 +2,7 @@
 
 const { REQUIRED_DOCUMENTS, privateProjection } = require("./provider-onboarding");
 const OPERATIONAL_DOCUMENTS = new Set(["RG_FRONT","RG_BACK","CPF_DOCUMENT","ADDRESS_PROOF","PROFILE_PHOTO","CNPJ_DOCUMENT","CERTIFICATE"]);
-const ADMIN_ACTIONS = new Set(["START_REVIEW","VALIDATE_DOCUMENT","REJECT_DOCUMENT","REQUEST_CORRECTION","APPROVE","SUSPEND","REACTIVATE","ADMIN_NOTE"]);
+const ADMIN_ACTIONS = new Set(["START_REVIEW","VALIDATE_DOCUMENT","REJECT_DOCUMENT","REQUEST_CORRECTION","APPROVE","SUSPEND","REACTIVATE","ADMIN_NOTE","SENSITIVE_DATA_VIEW"]);
 
 function fail(code,statusCode=409){throw Object.assign(new Error(code),{statusCode});}
 function timestamp(now=new Date()){return now.toISOString();}
@@ -10,8 +10,9 @@ function currentStatus(provider){return provider.status||provider.onboardingStat
 function maskCpf(value){const digits=String(value||"").replace(/\D/g,"");return digits.length===11?`***.${digits.slice(3,6)}.${digits.slice(6,9)}-**`:"***";}
 function maskRg(value){const text=String(value||"");return text.length>4?`${text.slice(0,2)}${"*".repeat(Math.min(8,text.length-4))}${text.slice(-2)}`:"****";}
 function pendingItems(provider){const pending=Object.values(provider.documents||{}).filter(item=>!["VALIDATED"].includes(item.status)).map(item=>item.type);if(provider.backgroundCheck?.status!=="VALIDATED")pending.push("BACKGROUND_CHECK");return[...new Set(pending)];}
-function adminSummary(provider){return{providerId:provider.providerId,professionalName:provider.professionalName||provider.name||"",fullName:provider.fullName||provider.name||"",phone:provider.phone||"",city:provider.address?.city||"",state:provider.address?.state||"",specialties:provider.specialties||[],status:currentStatus(provider),createdAt:provider.createdAt||null,pendingItems:pendingItems(provider)};}
-function adminDetail(provider){const {backgroundCheck,...safe}=privateProjection(provider);return{...safe,cpf:maskCpf(provider.cpf),rg:maskRg(provider.rg),backgroundCheckStatus:provider.backgroundCheck?.status||null,documents:Object.fromEntries(Object.entries(provider.documents||{}).map(([type,doc])=>[type,{type,status:doc.status,evidenceId:doc.evidenceId,submittedAt:doc.submittedAt,reviewedAt:doc.reviewedAt||null,reasonCode:doc.reasonCode||null,historyCount:(doc.history||[]).length}]))};}
+function adminSummary(provider){return{providerId:provider.providerId,professionalName:provider.professionalName||provider.name||"",fullName:provider.fullName||provider.name||"",phone:provider.phone||"",city:provider.address?.city||"",state:provider.address?.state||"",specialties:provider.specialties||[],status:currentStatus(provider),createdAt:provider.createdAt||null,pendingItems:pendingItems(provider),photoEvidenceId:provider.documents?.PROFILE_PHOTO?.evidenceId||null,backgroundCheckStatus:provider.backgroundCheck?.status||"PENDENTE"};}
+const DOCUMENT_ORDER=["PROFILE_PHOTO","RG_FRONT","RG_BACK","CPF_DOCUMENT","BACKGROUND_CHECK","ADDRESS_PROOF"];
+function adminDetail(provider){const {backgroundCheck,...safe}=privateProjection(provider);return{...safe,cpf:maskCpf(provider.cpf),rg:maskRg(provider.rg),backgroundCheckStatus:provider.backgroundCheck?.status||null,documents:Object.fromEntries(DOCUMENT_ORDER.filter(type=>provider.documents?.[type]).map(type=>{const doc=provider.documents[type];return[type,{type,status:doc.status,evidenceId:type==="BACKGROUND_CHECK"?null:doc.evidenceId,submittedAt:doc.submittedAt,reviewedAt:doc.reviewedAt||null,reasonCode:doc.reasonCode||null,historyCount:(doc.history||[]).length}]})),contract:provider.contract||null,history:provider.adminAudit||[]};}
 function audit(provider,claims,action,{reasonCode=null,note=null,now=new Date()}={}){if(!ADMIN_ACTIONS.has(action))fail("INVALID_ADMIN_ACTION",400);return[...(provider.adminAudit||[]),{actorId:claims.sub,actorRole:claims.role,action,providerId:provider.providerId,timestamp:timestamp(now),reasonCode:reasonCode||null,note:String(note||"").slice(0,2000)||null}];}
 async function mutate(repository,id,claims,action,input={}){const provider=await repository.getProvider(id);if(!provider)fail("PROVIDER_NOT_FOUND",404);const status=currentStatus(provider),now=new Date();let updated={...provider};
  if(action==="START_REVIEW"){if(!["SUBMITTED","RESUBMITTED"].includes(status))fail("INVALID_PROVIDER_STATUS");updated.status="UNDER_REVIEW";updated.onboardingStatus="UNDER_REVIEW";}
@@ -23,4 +24,4 @@ async function mutate(repository,id,claims,action,input={}){const provider=await
  else if(action!=="ADMIN_NOTE")fail("UNKNOWN_ACTION",404);
  updated.adminAudit=audit(provider,claims,action,{reasonCode:input.reasonCode,note:input.note||input.message,now});updated.updatedAt=timestamp(now);return repository.saveProvider(updated);}
 function providerSelfProjection(provider){const safe=privateProjection(provider);return{...safe,adminAudit:undefined,correctionRequests:(provider.correctionRequests||[]).filter(item=>item.status==="OPEN").map(({documentType,reasonCode,message,requestedAt})=>({documentType,reasonCode,message,requestedAt}))};}
-module.exports={OPERATIONAL_DOCUMENTS,maskCpf,maskRg,currentStatus,pendingItems,adminSummary,adminDetail,providerSelfProjection,mutate};
+module.exports={OPERATIONAL_DOCUMENTS,audit,maskCpf,maskRg,currentStatus,pendingItems,adminSummary,adminDetail,providerSelfProjection,mutate};
