@@ -2,3 +2,5 @@
 header img{max-width:100%;height:auto;max-height:90px;object-fit:contain}
 
 .document-stack{display:grid;gap:16px}.identity-document{display:grid;gap:12px;padding:18px;border:2px solid #b8c8d6;border-radius:14px;background:#f8fafc}.identity-document h3{margin:0;color:var(--navy);text-transform:uppercase;font-size:1rem;letter-spacing:.04em}.upload-card{padding:16px;border:1px solid #d4dde5;border-radius:12px;background:#fff}.upload-card small{font-weight:500}.upload-card input[type=file]{padding:8px;background:#f8fafc}.file-status{color:#526777;font-size:.92rem;font-weight:600}.file-status.selected{color:#087f5b}.success-card{text-align:center}.success-card ol{display:inline-block;text-align:left;line-height:1.8}.protocol{font:800 1.1rem monospace;background:#edf3f8;padding:12px;border-radius:9px}
+
+.upload-progress{margin-top:16px;padding:14px;border:1px solid #b8c8d6;border-radius:12px;background:#f8fafc}.upload-progress p{margin:5px 0}.upload-progress .done{color:#087f5b;font-weight:700}.upload-progress .failed{color:#a92828;font-weight:700}

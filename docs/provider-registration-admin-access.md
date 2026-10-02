@@ -20,3 +20,8 @@ Remova o usuário de `AUTH_USERS_JSON`, aplique a configuração e reinicie a im
 ## Auditoria
 
 Ações de análise, validação, rejeição, correção, observação, decisão administrativa e revelação de dados sensíveis são vinculadas ao usuário, papel, prestador e data/hora no histórico administrativo. Motivos e orientações podem ser registrados, mas o conteúdo de arquivos privados e os valores integrais de CPF/RG nunca devem entrar no log. Consulte o detalhe do cadastro e a trilha persistida no repositório de prestadores.
+
+
+## Fluxo de envio resiliente
+
+O cadastro público usa três fases autenticadas por token temporário: `POST /api/provider/register/start`, um `POST /api/provider/register/{providerId}/document` para cada arquivo e `POST /api/provider/register/{providerId}/finalize`. Todas exigem chave de idempotência. Um cadastro iniciado permanece `DRAFT` por até 24 horas para retentativas e só passa a `SUBMITTED` depois da validação de todos os documentos obrigatórios. Arquivos são limitados a 3 MB nesse fluxo para que, mesmo codificados para transporte, cada requisição permaneça abaixo do limite seguro da Function. Nunca registre conteúdo, Base64 ou token nos logs.
