@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>CAC — Agenda inteligente | Reforma Profissional</title>
+    <link rel="stylesheet" href="/public/agenda/agenda.css?v=1" />
+  </head>
+  <body>
+    <main class="agenda">
+      <a href="/admin/prestadores/">← Administração de prestadores</a>
+      <h1>CAC — Agenda inteligente</h1>
+      <form id="agenda-login" class="panel">
+        <h2>Acesso administrativo</h2>
+        <div class="grid">
+          <label
+            >Usuário<input
+              name="username"
+              autocomplete="username"
+              required /></label
+          ><label
+            >Senha<input
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+          /></label>
+        </div>
+        <button class="primary">Entrar</button>
+        <p role="alert" id="login-status"></p>
+      </form>
+      <button id="agenda-logout" hidden>Sair</button>
+      <section id="cac-agenda"></section>
+    </main>
+    <script src="/public/agenda/agenda.js?v=1"></script>
+    <script src="/public/agenda/admin.js?v=1"></script>
+  </body>
+</html>

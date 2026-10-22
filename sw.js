@@ -1,9 +1,11 @@
-const CACHE_NAME = "reforma-profissional-v18-official-brand";
+const CACHE_NAME = "reforma-profissional-v19-agenda";
 const APP_SHELL = [
   "/",
   "/index.html",
   "/styles.css?v=6",
   "/app.js?v=13",
+  "/public/agenda/agenda.css?v=1",
+  "/public/agenda/agenda.js?v=1",
   "./landing-pages.css?v=1",
   "./landing-pages.js?v=1",
   "./eletricista-bh/",

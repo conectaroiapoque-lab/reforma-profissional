@@ -1,11 +1,11 @@
 "use strict";
 const {authorize}=require("./auth"),{send,method,wrap}=require("./http"),ops=require("./operations-service"),reviews=require("./provider-review-service"),{requestIdentity}=require("./rate-limit"),{publicOrderView}=require("./order-service");
 function body(req){if(req.body&&typeof req.body==="object")return req.body;if(typeof req.body==="string")try{return JSON.parse(req.body)}catch{}throw Object.assign(new Error("INVALID_JSON_BODY"),{statusCode:400});}
-function providerHandler({repository,secretValue,rateLimiter}={}){return wrap(async(req,res)=>{const claims=authorize(req,"PROVIDER_OPERATE",{secretValue}),route=req.query?.route||req.route,action=req.query?.action||req.action,id=req.query?.id||req.id;
+function providerHandler({repository,secretValue,rateLimiter,scheduleRepository}={}){return wrap(async(req,res)=>{const claims=authorize(req,"PROVIDER_OPERATE",{secretValue}),route=req.query?.route||req.route,action=req.query?.action||req.action,id=req.query?.id||req.id;
   if(req.method==="GET"&&route==="profile"){const profile=await repository.getProvider(claims.sub);if(!profile)return send(res,404,{error:"PROVIDER_NOT_FOUND"});const {backgroundCheck,...safe}=profile;return send(res,200,{provider:safe,backgroundCheckStatus:backgroundCheck?.status||null});}
   if(req.method==="GET"&&route==="opportunities"){const orders=(await repository.list()).filter(o=>o.providerId===claims.sub&&o.status==="OFFERED");return send(res,200,{orders});}
   if(req.method==="GET"&&route==="orders"){const orders=(await repository.list()).filter(o=>o.providerId===claims.sub&&o.status!=="OFFERED");return send(res,200,{orders});}
-  method(req,"POST");if(rateLimiter&&["quote","fiscal-document","background-check"].includes(action))await rateLimiter.assert({scope:`provider-${action}`,identity:requestIdentity(req,claims.sub),limit:10});
+  method(req,"POST");if(scheduleRepository&&["start","complete"].includes(action)&&(await scheduleRepository.read()).plans[id])throw Object.assign(new Error("USE_SCHEDULE_ACTION"),{statusCode:409});if(rateLimiter&&["quote","fiscal-document","background-check"].includes(action))await rateLimiter.assert({scope:`provider-${action}`,identity:requestIdentity(req,claims.sub),limit:10});
   if(action==="change-order")return send(res,200,{order:await ops.createChangeOrder(repository,id,claims.sub,body(req))});
   return send(res,200,{order:await ops.providerAction(repository,id,claims.sub,action,body(req))});});}
 function permissionClaims(req,permissions,secretValue){for(const permission of permissions){try{return authorize(req,permission,{secretValue})}catch(error){if(error.message!=="FORBIDDEN")throw error}}throw Object.assign(new Error("FORBIDDEN"),{statusCode:403});}
