@@ -169,6 +169,8 @@ const EVENTS = [
   "RESCHEDULE",
   "CANCELLED",
   "COMPLETED",
+  "VISIT_COMPLETED",
+  "EXECUTION_COMPLETED",
   "AFTER_SALES",
 ];
 const LABELS = {
@@ -182,14 +184,21 @@ const LABELS = {
   EXECUTION_REMINDER: "Lembrete de execução",
   RESCHEDULE: "Solicitação de reagendamento registrada",
   CANCELLED: "Agendamento cancelado",
-  COMPLETED: "Serviço concluído",
+  COMPLETED: "Compromisso concluído",
+  VISIT_COMPLETED:
+    "Visita técnica concluída; avaliação registrada para elaboração do orçamento",
+  EXECUTION_COMPLETED: "Execução do serviço concluída",
   AFTER_SALES: "Como foi seu atendimento?",
 };
 function message(event, a) {
+  if (event === "COMPLETED")
+    event = a.type === "VISIT" ? "VISIT_COMPLETED" : "EXECUTION_COMPLETED";
   if (!EVENTS.includes(event)) fail("INVALID_NOTIFICATION", 400);
   return `Reforma Profissional — ${LABELS[event]}. Protocolo ${a.protocol}. ${a.slots?.length ? a.slots.map((s) => new Intl.DateTimeFormat("pt-BR", { timeZone: ZONE, dateStyle: "short", timeStyle: "short" }).format(new Date(s.start))).join(", ") + " (Brasília). " : ""}Consulte os detalhes no acompanhamento seguro. ${a.status !== "CONFIRMED" && ["PROVIDER_CONSULTED", "REQUEST_RECEIVED", "RESCHEDULE"].includes(event) ? "O horário ainda depende das confirmações necessárias." : ""}`;
 }
 function notify(state, event, a, now) {
+  if (event === "COMPLETED")
+    event = a.type === "VISIT" ? "VISIT_COMPLETED" : "EXECUTION_COMPLETED";
   state.notifications.push({
     id: crypto.randomUUID(),
     appointmentId: a.id,
@@ -253,6 +262,7 @@ class ScheduleService {
         ),
       );
     return {
+      ...(actor.role === "ADMIN" ? { revision: state.revision } : {}),
       timeZone: ZONE,
       appointments: items,
       notifications: state.notifications.filter(
@@ -481,6 +491,7 @@ class ScheduleService {
         "CANCELLED",
         "CUSTOMER_REJECTED",
         "SERVICE_COMPLETED",
+        "SERVICE_STARTED",
         "CLOSED",
         "DISPUTED",
         "PROVIDER_PAID",
@@ -498,10 +509,25 @@ class ScheduleService {
       fail("APPROVED_QUOTE_AND_CONTRACT_REQUIRED");
   }
   async mutate(actor, action, input = {}) {
-    const now = this.clock();
     return this.repo.transaction(async (state, refs) => {
+      const now = this.clock();
       const admin = actor.role === "ADMIN",
         provider = actor.role === "PROVIDER";
+      if (
+        admin &&
+        ["rule", "qualification", "availability", "plan", "proposal"].includes(
+          action,
+        )
+      ) {
+        if (
+          !Number.isInteger(input.expectedRevision) ||
+          input.expectedRevision < 0
+        )
+          fail("REVISION_REQUIRED", 400);
+        if (input.expectedRevision !== state.revision)
+          fail("STALE_SCHEDULE_CONFIGURATION");
+      }
+      input = { ...input };
       if (action === "rule") {
         if (!admin) fail("FORBIDDEN", 403);
         const s = getServiceByCode(input.serviceCode);
@@ -623,6 +649,16 @@ class ScheduleService {
         if (!admin) fail("FORBIDDEN", 403);
         const order = await refs.order(input.orderId);
         if (!order) fail("ORDER_NOT_FOUND", 404);
+        if (
+          [
+            "SERVICE_STARTED",
+            "SERVICE_COMPLETED",
+            "CANCELLED",
+            "CLOSED",
+            "DISPUTED",
+          ].includes(order.status)
+        )
+          fail("ORDER_NOT_SCHEDULABLE");
         const rule = ruleFor(state, order);
         if (
           !["VISIT", "REMOTE", "DIRECT"].includes(input.mode) ||
@@ -717,6 +753,10 @@ class ScheduleService {
             amountCents,
             currency: "BRL",
             description: required(input.description, "COMMERCIAL_SCOPE", 2000),
+            scope: required(input.description, "COMMERCIAL_SCOPE", 2000),
+            quantity: report?.quantity ?? null,
+            unit: report?.unit ?? null,
+            commercialConditions: report?.conditions ?? null,
             catalogVersion: CATALOG_VERSION,
             serviceCode: service.code,
             reviewedBy: actor.sub,
@@ -1056,8 +1096,10 @@ class ScheduleService {
         if (
           !provider ||
           a.status !== "CONFIRMED" ||
-          now < Date.parse(a.slots[0].start) ||
-          now >= Date.parse(a.slots.at(-1).end)
+          !a.slots.some(
+            (slot) =>
+              now >= Date.parse(slot.start) && now < Date.parse(slot.end),
+          )
         )
           fail("INVALID_START");
         if (a.type === "EXECUTION") {
@@ -1141,10 +1183,26 @@ class ScheduleService {
           ];
           refs.saveOrder(order);
         }
-        event = "COMPLETED";
+        event = a.type === "VISIT" ? "VISIT_COMPLETED" : "EXECUTION_COMPLETED";
       } else if (action === "notification") {
         if (!admin) fail("FORBIDDEN", 403);
+        if (input.event === "COMPLETED")
+          input = {
+            ...input,
+            event:
+              a.type === "VISIT" ? "VISIT_COMPLETED" : "EXECUTION_COMPLETED",
+          };
         if (!EVENTS.includes(input.event)) fail("INVALID_NOTIFICATION", 400);
+        if (
+          input.event === "VISIT_COMPLETED" &&
+          (a.type !== "VISIT" || a.status !== "COMPLETED")
+        )
+          fail("NOTIFICATION_STATE_MISMATCH");
+        if (
+          ["EXECUTION_COMPLETED", "AFTER_SALES"].includes(input.event) &&
+          (a.type !== "EXECUTION" || a.status !== "COMPLETED")
+        )
+          fail("NOTIFICATION_STATE_MISMATCH");
         if (
           ["VISIT_CONFIRMED", "VISIT_REMINDER"].includes(input.event) &&
           (a.type !== "VISIT" || a.status !== "CONFIRMED")

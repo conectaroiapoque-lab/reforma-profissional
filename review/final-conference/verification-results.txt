@@ -1,0 +1,17 @@
+Existing local files preserved byte-for-byte: 46 files.
+
+Tests: 284
+ℹ suites 0
+ℹ pass 284
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7597.948923
+
+Build: PASS
+Mobile Chromium 390/1280: PASS
+Catalog validation: PASS
+Provider concurrency: known defect reproduced, NOT corrected.
+Environment UI warnings: both texts NOT identified.
+No commit/push/merge/deploy.

@@ -87,6 +87,7 @@ test("API: orçamento oficial aprovado pelo cliente antes da reserva; versão de
     method: "POST",
     input: {
       action: "proposal",
+      expectedRevision: (await f.repo.read()).revision,
       orderId: "o1",
       amountCents: 1,
       description: "Troca conforme tabela",

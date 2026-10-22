@@ -131,7 +131,7 @@ test("orçamento não aprovado e materiais pendentes impedem execução", async 
   await assert.rejects(f.book(), error("APPROVED_QUOTE_AND_CONTRACT_REQUIRED"));
   o.quoteStatus = "CUSTOMER_APPROVED";
   await f.repo.save(o);
-  await f.service.mutate(admin, "plan", {
+  await f.adminMutate("plan", {
     orderId: "o1",
     mode: "DIRECT",
     durationMinutes: 60,

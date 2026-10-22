@@ -107,7 +107,22 @@
             accept: "application/json",
             ...(input ? { "content-type": "application/json" } : {}),
           },
-          ...(input ? { body: JSON.stringify(input) } : {}),
+          ...(input
+            ? {
+                body: JSON.stringify(
+                  scope === "admin" &&
+                    [
+                      "rule",
+                      "qualification",
+                      "availability",
+                      "plan",
+                      "proposal",
+                    ].includes(input.action)
+                    ? { ...input, expectedRevision: data.revision }
+                    : input,
+                ),
+              }
+            : {}),
           cache: "no-store",
         }),
         body = await response.json();
@@ -119,6 +134,8 @@
             "Este horário deixou de estar disponível. Consulte novamente.",
           APPROVED_QUOTE_AND_CONTRACT_REQUIRED:
             "A execução exige orçamento aprovado e condições de contratação aceitas.",
+          STALE_SCHEDULE_CONFIGURATION:
+            "A configuração mudou desde sua leitura. Atualize a agenda antes de editar.",
           STALE_APPOINTMENT: "A agenda mudou. Atualize e tente novamente.",
           PROVIDER_NOT_ELIGIBLE:
             "O profissional ainda não tem habilitação verificada para este atendimento.",
@@ -228,7 +245,8 @@
                         EXECUTION_REMINDER: "Lembrete execução",
                         RESCHEDULE: "Reagendamento",
                         CANCELLED: "Cancelamento",
-                        COMPLETED: "Concluído",
+                        VISIT_COMPLETED: "Visita concluída",
+                        EXECUTION_COMPLETED: "Execução concluída",
                         AFTER_SALES: "Pós-venda",
                       },
                     )

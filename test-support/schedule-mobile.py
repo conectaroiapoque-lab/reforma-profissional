@@ -48,10 +48,40 @@ try:
             assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth'), 'CAC overflow'
             page.get_by_text('Regras e habilitações — configuração autorizada do CAC', exact=True).click()
             assert page.get_by_role('button', name='Registrar regra', exact=True).is_visible()
+            form = page.locator('[data-form="rule"]')
+            values = {'serviceCode': 'RP0001', 'mode': 'VISIT', 'visitMinutes': '60', 'travelMinutes': '30', 'holdMinutes': '1440', 'cancelBeforeMinutes': '60', 'source': 'TEST POLICY ONLY', 'reason': 'Teste de revisão administrativa'}
+            for name, value in values.items():
+                if name == 'mode':
+                    form.locator('[name="mode"]').select_option(value)
+                else:
+                    form.locator('[name="' + name + '"]').fill(value)
+            with page.expect_response(lambda response: response.url.endswith('/api/admin/agenda') and response.request.method == 'POST') as response_info:
+                form.get_by_role('button', name='Registrar regra', exact=True).click()
+            response = response_info.value
+            assert response.status == 200
+            assert isinstance(response.request.post_data_json.get('expectedRevision'), int)
+            page.locator('#cac-agenda [data-message]').filter(has_text='Agenda atualizada.').wait_for()
+            page.get_by_text('Regras e habilitações — configuração autorizada do CAC', exact=True).click()
+            for name, value in values.items():
+                control = page.locator('[data-form="rule"] [name="' + name + '"]')
+                if name == 'mode':
+                    control.select_option(value)
+                else:
+                    control.fill(value)
+            page.evaluate("""async token => {
+                const headers = {authorization: 'Bearer ' + token, 'content-type': 'application/json'};
+                const state = await fetch('/api/admin/agenda', {headers}).then(r => r.json());
+                const response = await fetch('/api/admin/agenda', {method: 'POST', headers, body: JSON.stringify({action: 'rule', expectedRevision: state.revision, serviceCode: 'RP0001', ...state.rules.RP0001, source: 'Alteração concorrente', reason: 'Teste em outra sessão'})});
+                if (!response.ok) throw new Error('Fixture concurrent update failed');
+            }""", sessions['tokens']['admin'])
+            with page.expect_response(lambda response: response.url.endswith('/api/admin/agenda') and response.request.method == 'POST') as stale_response_info:
+                page.locator('[data-form="rule"]').get_by_role('button', name='Registrar regra', exact=True).click()
+            assert stale_response_info.value.status == 409
+            page.locator('#cac-agenda [data-message]').filter(has_text='A configuração mudou desde sua leitura').wait_for()
             page.screenshot(path=f'/tmp/reforma-agenda-cac-{width}.png', full_page=True)
             context.close()
         browser.close()
-    print('PASS: cliente, profissional, aceite real pela API de teste, CAC mensal e formulários; 390 e 1280 px, sem overflow.')
+    print('PASS: cliente, profissional, aceite real pela API de teste, CAC mensal, envio de revisão e rejeição 409 de edição desatualizada; 390 e 1280 px, sem overflow.')
 finally:
     server.terminate()
     server.wait(timeout=5)

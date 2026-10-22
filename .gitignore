@@ -13,3 +13,6 @@ ios/App/Pods/
 ios/App/DerivedData/
 *.xcuserstate
 xcuserdata/
+
+# Confidential catalog sources and internal financial reconciliation (local only)
+review/catalog-reconciliation/private/

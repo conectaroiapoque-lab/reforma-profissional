@@ -1,0 +1,1133 @@
+diff --git a/public/agenda/agenda.js b/public/agenda/agenda.js
+index cdac367..94caf71 100644
+--- a/public/agenda/agenda.js
++++ b/public/agenda/agenda.js
+@@ -107,7 +107,22 @@
+             accept: "application/json",
+             ...(input ? { "content-type": "application/json" } : {}),
+           },
+-          ...(input ? { body: JSON.stringify(input) } : {}),
++          ...(input
++            ? {
++                body: JSON.stringify(
++                  scope === "admin" &&
++                    [
++                      "rule",
++                      "qualification",
++                      "availability",
++                      "plan",
++                      "proposal",
++                    ].includes(input.action)
++                    ? { ...input, expectedRevision: data.revision }
++                    : input,
++                ),
++              }
++            : {}),
+           cache: "no-store",
+         }),
+         body = await response.json();
+@@ -119,6 +134,8 @@
+             "Este horário deixou de estar disponível. Consulte novamente.",
+           APPROVED_QUOTE_AND_CONTRACT_REQUIRED:
+             "A execução exige orçamento aprovado e condições de contratação aceitas.",
++          STALE_SCHEDULE_CONFIGURATION:
++            "A configuração mudou desde sua leitura. Atualize a agenda antes de editar.",
+           STALE_APPOINTMENT: "A agenda mudou. Atualize e tente novamente.",
+           PROVIDER_NOT_ELIGIBLE:
+             "O profissional ainda não tem habilitação verificada para este atendimento.",
+@@ -228,7 +245,8 @@
+                         EXECUTION_REMINDER: "Lembrete execução",
+                         RESCHEDULE: "Reagendamento",
+                         CANCELLED: "Cancelamento",
+-                        COMPLETED: "Concluído",
++                        VISIT_COMPLETED: "Visita concluída",
++                        EXECUTION_COMPLETED: "Execução concluída",
+                         AFTER_SALES: "Pós-venda",
+                       },
+                     )
+diff --git a/server/operations-api.js b/server/operations-api.js
+index 0a94fc6..84d81b3 100644
+--- a/server/operations-api.js
++++ b/server/operations-api.js
+@@ -10,16 +10,16 @@ function providerHandler({repository,secretValue,rateLimiter,scheduleRepository}
+   return send(res,200,{order:await ops.providerAction(repository,id,claims.sub,action,body(req))});});}
+ function permissionClaims(req,permissions,secretValue){for(const permission of permissions){try{return authorize(req,permission,{secretValue})}catch(error){if(error.message!=="FORBIDDEN")throw error}}throw Object.assign(new Error("FORBIDDEN"),{statusCode:403});}
+ function adminHandler({repository,secretValue}={}){return wrap(async(req,res)=>{const claims=authorize(req,"ADMIN_READ",{secretValue}),route=req.query?.route||req.route,id=req.query?.id||req.id,action=req.query?.action||req.action;
+-  if(req.method==="GET"&&route==="orders"){authorize(req,"ADMIN_WRITE",{secretValue});return send(res,200,{orders:await repository.list()});}
++  if(req.method==="GET"&&route==="orders"){authorize(req,"ADMIN_WRITE",{secretValue});return send(res,200,{orders:(await repository.list()).map(order=>({...order,version:order.version||0}))});}
+   if(req.method==="GET"&&route==="providers"){const status=req.query?.status;const providers=(await repository.listProviders()).map(reviews.adminSummary).filter(provider=>!status||provider.status===status);return send(res,200,{providers,viewerRole:claims.role});}
+   if(req.method==="GET"&&route==="provider"){const provider=await repository.getProvider(id);if(!provider)return send(res,404,{error:"PROVIDER_NOT_FOUND"});return send(res,200,{provider:reviews.adminDetail(provider),viewerRole:claims.role});}
+   if(req.method==="GET"&&action==="sensitive"){authorize(req,"PROVIDER_SENSITIVE_READ",{secretValue});const provider=await repository.getProvider(id);if(!provider)return send(res,404,{error:"PROVIDER_NOT_FOUND"});provider.adminAudit=reviews.audit(provider,claims,"SENSITIVE_DATA_VIEW",{note:"cpf,rg"});await repository.saveProvider(provider);return send(res,200,{data:{cpf:provider.cpf,rg:provider.rg}});}
+-  method(req,"POST");const input=body(req);
+-  if(action==="assign-provider"){authorize(req,"ADMIN_WRITE",{secretValue});return send(res,200,{order:await ops.assignProvider(repository,id,input.providerId,`ADMIN:${claims.sub}`)});}
++  method(req,"POST");const input=body(req);if(["assign-provider","approve-quote","authorize-service","review-change-order"].includes(action)&&(!Number.isInteger(input.expectedVersion)||input.expectedVersion<0))throw Object.assign(new Error("ORDER_VERSION_REQUIRED"),{statusCode:400});
++  if(action==="assign-provider"){authorize(req,"ADMIN_WRITE",{secretValue});return send(res,200,{order:await ops.assignProvider(repository,id,input.providerId,`ADMIN:${claims.sub}`,{expectedVersion:input.expectedVersion})});}
+   if(["approve-quote","authorize-service","review-change-order"].includes(action)){authorize(req,"ADMIN_WRITE",{secretValue});return send(res,200,{order:await ops.adminAction(repository,id,action,input,claims)});}
+   const providerActions={review:"START_REVIEW","start-review":"START_REVIEW","validate-document":"VALIDATE_DOCUMENT","reject-document":"REJECT_DOCUMENT","request-correction":"REQUEST_CORRECTION",approve:"APPROVE",suspend:"SUSPEND",reactivate:"REACTIVATE",note:"ADMIN_NOTE"};
+   if(providerActions[action]){if(["approve","suspend","reactivate"].includes(action))authorize(req,"ADMIN_WRITE",{secretValue});else permissionClaims(req,["ADMIN_WRITE","PROVIDER_REGISTRATION_REVIEW"],secretValue);return send(res,200,{provider:reviews.adminDetail(await reviews.mutate(repository,id,claims,providerActions[action],input))});}
+   throw Object.assign(new Error("UNKNOWN_ACTION"),{statusCode:404});});}
+-function customerHandler({repository,secretValue}={}){return wrap(async(req,res)=>{const claims=authorize(req,"OWN_ORDER_READ",{secretValue}),id=req.query?.id||req.id,order=await repository.get(id);if(!order)return send(res,404,{error:"ORDER_NOT_FOUND"});if(order.customerId!==claims.sub)throw Object.assign(new Error("FORBIDDEN"),{statusCode:403});if(req.method==="GET")return send(res,200,{order:publicOrderView(order)});method(req,"POST");const input=body(req),action=req.query?.action||req.action;if(action==="quote-decision")return send(res,200,{order:await ops.customerQuoteDecision(repository,id,claims.sub,input.decision)});if(action==="change-order-decision")return send(res,200,{order:await ops.customerChangeDecision(repository,id,claims.sub,input.decision)});throw Object.assign(new Error("UNKNOWN_ACTION"),{statusCode:404});});}
++function customerHandler({repository,secretValue}={}){return wrap(async(req,res)=>{const claims=authorize(req,"OWN_ORDER_READ",{secretValue}),id=req.query?.id||req.id,order=await repository.get(id);if(!order)return send(res,404,{error:"ORDER_NOT_FOUND"});if(order.customerId!==claims.sub)throw Object.assign(new Error("FORBIDDEN"),{statusCode:403});if(req.method==="GET")return send(res,200,{order:publicOrderView(order)});method(req,"POST");const input=body(req),action=req.query?.action||req.action;if(action==="quote-decision")return send(res,200,{order:publicOrderView(await ops.customerQuoteDecision(repository,id,claims.sub,input.decision,input.quoteId))});if(action==="change-order-decision")return send(res,200,{order:publicOrderView(await ops.customerChangeDecision(repository,id,claims.sub,input.decision,input.changeOrderId))});throw Object.assign(new Error("UNKNOWN_ACTION"),{statusCode:404});});}
+ function fiscalReviewHandler({repository,secretValue}={}){return wrap(async(req,res)=>{method(req,"POST");const claims=authorize(req,"FISCAL_REVIEW",{secretValue});return send(res,200,{order:await ops.reviewFiscal(repository,req.query?.id||req.id,claims,body(req))});});}
+ module.exports={body,providerHandler,adminHandler,customerHandler,fiscalReviewHandler};
+diff --git a/server/operations-service.js b/server/operations-service.js
+index 955bd04..b8f01a6 100644
+--- a/server/operations-service.js
++++ b/server/operations-service.js
+@@ -5,9 +5,12 @@ function fail(code,statusCode=409){throw Object.assign(new Error(code),{statusCo
+ function now(){return new Date().toISOString();}
+ function audit(order,event,actor,details={}){return{...order,auditTrail:[...(order.auditTrail||[]),{event,actor,timestamp:now(),...details}]};}
+ function assertOwner(order,providerId){if(order.providerId!==providerId)fail("FORBIDDEN",403);}
+-async function mutate(repository,id,fn){const order=await repository.get(id);if(!order)fail("ORDER_NOT_FOUND",404);const updated=fn(order);return repository.save(updated);}
+-async function assignProvider(repository,id,providerId,actor){const provider=await repository.getProvider(providerId);if(!provider)fail("PROVIDER_NOT_FOUND",404);const legacyEligible=!provider.status&&provider.onboardingStatus==="APPROVED",modernEligible=provider.status==="APPROVED"&&provider.active===true&&!provider.suspendedAt&&provider.contract?.status==="CURRENT"&&provider.backgroundCheck?.status==="VALIDATED"&&Object.values(provider.documents||{}).length>0&&Object.values(provider.documents).every(document=>document.status==="VALIDATED");if(!legacyEligible&&!modernEligible)fail("PROVIDER_NOT_ELIGIBLE");return mutate(repository,id,o=>audit({...o,providerId,status:"OFFERED"},"PROVIDER_ASSIGNED",actor,{providerId}));}
+-async function providerAction(repository,id,providerId,action,body={}){return mutate(repository,id,order=>{assertOwner(order,providerId);const actor=`PROVIDER:${providerId}`;
++async function mutate(repository,id,fn,expectedVersion){if(typeof repository.mutateOrder!=="function")fail("ATOMIC_ORDER_REPOSITORY_REQUIRED",503);return repository.mutateOrder(id,(order,state,refs)=>{if(expectedVersion!==undefined&&(order.version||0)!==expectedVersion)fail("STALE_ORDER");return fn(order,state,refs);});}
++function quoteVersion(order,id){if(typeof id!=="string"||!id)fail("QUOTE_VERSION_REQUIRED",400);if(order.quote?.quoteId!==id)fail("STALE_QUOTE");}
++function changeVersion(order,id){if(typeof id!=="string"||!id)fail("CHANGE_ORDER_VERSION_REQUIRED",400);if(order.changeOrder?.changeOrderId!==id)fail("STALE_CHANGE_ORDER");}
++function hasActiveAppointment(state,id){return Object.values(state?.appointments||{}).some(a=>a.orderId===id&&!["CANCELLED","DECLINED","COMPLETED","EXPIRED"].includes(a.status)&&!(a.status==="PENDING_PROVIDER"&&Date.parse(a.expiresAt)<=Date.now()));}
++async function assignProvider(repository,id,providerId,actor,options={}){const provider=await repository.getProvider(providerId);if(!provider)fail("PROVIDER_NOT_FOUND",404);const legacyEligible=!provider.status&&provider.onboardingStatus==="APPROVED",modernEligible=provider.status==="APPROVED"&&provider.active===true&&!provider.suspendedAt&&provider.contract?.status==="CURRENT"&&provider.backgroundCheck?.status==="VALIDATED"&&Object.values(provider.documents||{}).length>0&&Object.values(provider.documents).every(document=>document.status==="VALIDATED");if(!legacyEligible&&!modernEligible)fail("PROVIDER_NOT_ELIGIBLE");return mutate(repository,id,async(o,state,refs)=>{if(hasActiveAppointment(state,id))fail("USE_SCHEDULE_ACTION");const current=await refs.provider(providerId);const eligible=current&&((!current.status&&current.onboardingStatus==="APPROVED")||(current.status==="APPROVED"&&current.active===true&&!current.suspendedAt&&current.contract?.status==="CURRENT"&&current.backgroundCheck?.status==="VALIDATED"&&Object.values(current.documents||{}).length>0&&Object.values(current.documents).every(d=>d.status==="VALIDATED")));if(!eligible)fail("PROVIDER_NOT_ELIGIBLE");return audit({...o,providerId,status:"OFFERED"},"PROVIDER_ASSIGNED",actor,{providerId});},options.expectedVersion);}
++async function providerAction(repository,id,providerId,action,body={}){return mutate(repository,id,(order,state)=>{assertOwner(order,providerId);if(["start","complete"].includes(action)&&state?.plans[id])fail("USE_SCHEDULE_ACTION");const actor=`PROVIDER:${providerId}`;
+   if(action==="accept"){if(order.status!=="OFFERED")fail("INVALID_ORDER_STATE");return audit({...order,status:"PROVIDER_ACCEPTED",quoteStatus:order.pricingMode==="QUOTE"?"PROVIDER_ANALYSIS":order.quoteStatus,quoteHistory:order.pricingMode==="QUOTE"?[...(order.quoteHistory||["CUSTOMER_REQUEST"]),"PROVIDER_ANALYSIS"]:order.quoteHistory},"PROVIDER_ACCEPTED",actor);}
+   if(action==="decline"){if(order.status!=="OFFERED")fail("INVALID_ORDER_STATE");return audit({...order,providerId:null,status:"SEARCHING_PROVIDER"},"PROVIDER_DECLINED",actor);}
+   if(action==="arrive"){if(order.status!=="PROVIDER_ACCEPTED")fail("INVALID_ORDER_STATE");return audit({...order,status:"PROVIDER_ARRIVED",providerArrivedAt:now()},"PROVIDER_ARRIVED",actor);}
+@@ -17,12 +20,12 @@ async function providerAction(repository,id,providerId,action,body={}){return mu
+   if(action==="fiscal-document"){if(order.status!=="SERVICE_COMPLETED"||!body.evidenceId||!body.type||!body.number||!body.date||!Number.isInteger(body.amountCents)||!body.issuer||!body.recipient)fail("INVALID_FISCAL_DOCUMENT",400);return audit({...order,fiscalStatus:"FISCAL_DOCUMENT_SUBMITTED",fiscalDocument:{type:body.type,number:body.number,date:body.date,amountCents:body.amountCents,issuer:body.issuer,recipient:body.recipient,evidenceId:body.evidenceId,submittedAt:now()}},"FISCAL_DOCUMENT_SUBMITTED",actor);}
+   fail("UNKNOWN_ACTION",404);});}
+ async function adminAction(repository,id,action,body,claims){const actor=`${claims.role}:${claims.sub}`;return mutate(repository,id,order=>{
+-  if(action==="approve-quote"){if(order.quoteStatus!=="PROVIDER_QUOTE_SUBMITTED")fail("INVALID_QUOTE_STATE");return audit({...order,quoteStatus:"CUSTOMER_QUOTE_SENT",quoteHistory:[...order.quoteHistory,"PLATFORM_REVIEW","QUOTE_APPROVED","CUSTOMER_QUOTE_SENT"],quote:{...order.quote,reviewedAt:now(),reviewedBy:claims.sub}},"QUOTE_APPROVED_AND_SENT",actor,{transitions:["PLATFORM_REVIEW","QUOTE_APPROVED","CUSTOMER_QUOTE_SENT"]});}
+-  if(action==="authorize-service"){if(order.pricingMode==="QUOTE"&&order.quoteStatus!=="CUSTOMER_APPROVED")fail("CUSTOMER_APPROVAL_REQUIRED");return audit({...order,quoteStatus:order.pricingMode==="QUOTE"?"PROVIDER_AUTHORIZED":order.quoteStatus,quoteHistory:order.pricingMode==="QUOTE"?[...order.quoteHistory,"PROVIDER_AUTHORIZED"]:order.quoteHistory},"SERVICE_AUTHORIZED",actor);}
+-  if(action==="review-change-order"){if(order.changeOrder?.status!=="CHANGE_ORDER_CREATED")fail("INVALID_CHANGE_ORDER_STATE");const approved=body.decision==="APPROVE";return audit({...order,changeOrder:{...order.changeOrder,status:approved?"PLATFORM_REVIEW":"CUSTOMER_REJECTED",reviewedBy:claims.sub,reviewedAt:now()}},"CHANGE_ORDER_REVIEWED",actor);}
+-  fail("UNKNOWN_ACTION",404);});}
+-async function customerQuoteDecision(repository,id,customerId,decision){return mutate(repository,id,order=>{if(order.customerId!==customerId)fail("FORBIDDEN",403);if(order.quoteStatus!=="CUSTOMER_QUOTE_SENT")fail("INVALID_QUOTE_STATE");const approved=decision==="APPROVE",next=approved?"CUSTOMER_APPROVED":"CUSTOMER_REJECTED";return audit({...order,quoteStatus:next,quoteHistory:[...order.quoteHistory,next]},next,`CUSTOMER:${customerId}`);});}
++  if(action==="approve-quote"){quoteVersion(order,body.quoteId);if(order.quoteStatus!=="PROVIDER_QUOTE_SUBMITTED")fail("INVALID_QUOTE_STATE");return audit({...order,quoteStatus:"CUSTOMER_QUOTE_SENT",quoteHistory:[...order.quoteHistory,"PLATFORM_REVIEW","QUOTE_APPROVED","CUSTOMER_QUOTE_SENT"],quote:{...order.quote,reviewedAt:now(),reviewedBy:claims.sub}},"QUOTE_APPROVED_AND_SENT",actor,{transitions:["PLATFORM_REVIEW","QUOTE_APPROVED","CUSTOMER_QUOTE_SENT"]});}
++  if(action==="authorize-service"){if(order.quote)quoteVersion(order,body.quoteId);if(order.pricingMode==="QUOTE"&&order.quoteStatus!=="CUSTOMER_APPROVED")fail("CUSTOMER_APPROVAL_REQUIRED");return audit({...order,quoteStatus:order.pricingMode==="QUOTE"?"PROVIDER_AUTHORIZED":order.quoteStatus,quoteHistory:order.pricingMode==="QUOTE"?[...order.quoteHistory,"PROVIDER_AUTHORIZED"]:order.quoteHistory},"SERVICE_AUTHORIZED",actor);}
++  if(action==="review-change-order"){changeVersion(order,body.changeOrderId);if(!["APPROVE","REJECT"].includes(body.decision))fail("INVALID_CHANGE_ORDER_DECISION",400);if(order.changeOrder?.status!=="CHANGE_ORDER_CREATED")fail("INVALID_CHANGE_ORDER_STATE");const approved=body.decision==="APPROVE";return audit({...order,changeOrder:{...order.changeOrder,status:approved?"PLATFORM_REVIEW":"CUSTOMER_REJECTED",reviewedBy:claims.sub,reviewedAt:now()}},"CHANGE_ORDER_REVIEWED",actor);}
++  fail("UNKNOWN_ACTION",404);},body.expectedVersion);}
++async function customerQuoteDecision(repository,id,customerId,decision,quoteId){return mutate(repository,id,order=>{if(order.customerId!==customerId)fail("FORBIDDEN",403);quoteVersion(order,quoteId);if(!["APPROVE","REJECT"].includes(decision))fail("INVALID_QUOTE_DECISION",400);if(order.quoteStatus!=="CUSTOMER_QUOTE_SENT")fail("INVALID_QUOTE_STATE");const approved=decision==="APPROVE",next=approved?"CUSTOMER_APPROVED":"CUSTOMER_REJECTED";return audit({...order,quoteStatus:next,quoteHistory:[...order.quoteHistory,next],quote:{...order.quote,customerDecision:{quoteId,decision,customerId,at:now()}}},next,`CUSTOMER:${customerId}`);});}
+ async function createChangeOrder(repository,id,providerId,{amountCents,reason}){return mutate(repository,id,order=>{assertOwner(order,providerId);if(order.status!=="SERVICE_STARTED"||!Number.isInteger(amountCents)||amountCents<=0)fail("INVALID_CHANGE_ORDER",400);return audit({...order,changeOrder:{changeOrderId:`CHG-${crypto.randomUUID()}`,status:"CHANGE_ORDER_CREATED",amountCents,reason,createdAt:now()}},"CHANGE_ORDER_CREATED",`PROVIDER:${providerId}`);});}
+-async function customerChangeDecision(repository,id,customerId,decision){return mutate(repository,id,order=>{if(order.customerId!==customerId)fail("FORBIDDEN",403);if(order.changeOrder?.status!=="PLATFORM_REVIEW")fail("INVALID_CHANGE_ORDER_STATE");const approved=decision==="APPROVE";return audit({...order,changeOrder:{...order.changeOrder,status:approved?"APPLIED":"CUSTOMER_REJECTED",customerDecidedAt:now()},...(approved?{approvedAdditionalAmountCents:order.changeOrder.amountCents}:{})},approved?"CHANGE_ORDER_APPLIED":"CHANGE_ORDER_REJECTED",`CUSTOMER:${customerId}`);});}
++async function customerChangeDecision(repository,id,customerId,decision,changeOrderId){return mutate(repository,id,order=>{if(order.customerId!==customerId)fail("FORBIDDEN",403);changeVersion(order,changeOrderId);if(!["APPROVE","REJECT"].includes(decision))fail("INVALID_CHANGE_ORDER_DECISION",400);if(order.changeOrder?.status!=="PLATFORM_REVIEW")fail("INVALID_CHANGE_ORDER_STATE");const approved=decision==="APPROVE";return audit({...order,changeOrder:{...order.changeOrder,status:approved?"APPLIED":"CUSTOMER_REJECTED",customerDecidedAt:now()},...(approved?{approvedAdditionalAmountCents:order.changeOrder.amountCents}:{})},approved?"CHANGE_ORDER_APPLIED":"CHANGE_ORDER_REJECTED",`CUSTOMER:${customerId}`);});}
+ async function reviewFiscal(repository,id,claims,{decision,reasonCode}){return mutate(repository,id,order=>{if(order.fiscalStatus!=="FISCAL_DOCUMENT_SUBMITTED")fail("INVALID_FISCAL_STATE");const approved=decision==="APPROVE";return audit({...order,fiscalStatus:approved?"FISCAL_DOCUMENT_APPROVED":"FISCAL_DOCUMENT_REJECTED",fiscalReview:{reviewedBy:claims.sub,reviewedAt:now(),decision:approved?"APPROVED":"REJECTED",reasonCode:reasonCode||null},...(approved?{providerPaymentStatus:"READY"}:{})},"FISCAL_DOCUMENT_REVIEWED",`${claims.role}:${claims.sub}`);});}
+ module.exports={QUOTE_FLOW,assignProvider,providerAction,adminAction,customerQuoteDecision,createChangeOrder,customerChangeDecision,reviewFiscal};
+diff --git a/server/order-repository.js b/server/order-repository.js
+index 2f14055..cd4b131 100644
+--- a/server/order-repository.js
++++ b/server/order-repository.js
+@@ -1,7 +1,7 @@
+ "use strict";
+-class MemoryOrderRepository{constructor(){this.items=new Map();this.keys=new Map();this.providers=new Map();this.registrationKeys=new Map();}async create(order,key){if(this.keys.has(key))return structuredClone(this.items.get(this.keys.get(key)));if(this.items.has(order.orderId))throw new Error("ORDER_EXISTS");this.items.set(order.orderId,structuredClone(order));this.keys.set(key,order.orderId);return structuredClone(order);}async save(order){if(!order?.orderId||!this.items.has(order.orderId))throw new Error("ORDER_NOT_FOUND");this.items.set(order.orderId,structuredClone(order));return structuredClone(order);}async list(){return[...this.items.values()].map(item=>structuredClone(item));}async get(id){return this.items.has(id)?structuredClone(this.items.get(id)):null;}async createProvider(provider){for(const item of this.providers.values())if(item.cpf===provider.cpf||item.email===provider.email||item.phone===provider.phone)throw Object.assign(new Error("DUPLICATE_PROVIDER_IDENTITY"),{statusCode:409});return this.saveProvider(provider);}async getRegistrationIdempotency(key){return this.registrationKeys.get(key)||null;}async setRegistrationIdempotency(key,providerId){this.registrationKeys.set(key,providerId);}async saveProvider(provider){if(!provider?.providerId)throw new Error("INVALID_PROVIDER");this.providers.set(provider.providerId,structuredClone(provider));return structuredClone(provider);}async getProvider(id){return this.providers.has(id)?structuredClone(this.providers.get(id)):null;}async listProviders(){return[...this.providers.values()].map(item=>structuredClone(item));}}
++class MemoryOrderRepository{constructor(){this.items=new Map();this.keys=new Map();this.providers=new Map();this.registrationKeys=new Map();}async mutateOrder(id,fn){return require("./order-mutations").memoryMutateOrder.call(this,id,fn);}async create(order,key){if(this.keys.has(key))return structuredClone(this.items.get(this.keys.get(key)));if(this.items.has(order.orderId))throw new Error("ORDER_EXISTS");this.items.set(order.orderId,structuredClone(order));this.keys.set(key,order.orderId);return structuredClone(order);}async save(order){if(!order?.orderId||!this.items.has(order.orderId))throw new Error("ORDER_NOT_FOUND");this.items.set(order.orderId,structuredClone(order));return structuredClone(order);}async list(){return[...this.items.values()].map(item=>structuredClone(item));}async get(id){return this.items.has(id)?structuredClone(this.items.get(id)):null;}async createProvider(provider){for(const item of this.providers.values())if(item.cpf===provider.cpf||item.email===provider.email||item.phone===provider.phone)throw Object.assign(new Error("DUPLICATE_PROVIDER_IDENTITY"),{statusCode:409});return this.saveProvider(provider);}async getRegistrationIdempotency(key){return this.registrationKeys.get(key)||null;}async setRegistrationIdempotency(key,providerId){this.registrationKeys.set(key,providerId);}async saveProvider(provider){if(!provider?.providerId)throw new Error("INVALID_PROVIDER");this.providers.set(provider.providerId,structuredClone(provider));return structuredClone(provider);}async getProvider(id){return this.providers.has(id)?structuredClone(this.providers.get(id)):null;}async listProviders(){return[...this.providers.values()].map(item=>structuredClone(item));}}
+ function datastoreUnavailable(internalCode="DATASTORE_UNAVAILABLE"){return Object.assign(new Error(internalCode),{statusCode:503,publicCode:"DATASTORE_UNAVAILABLE",publicMessage:"Serviço temporariamente indisponível. Tente novamente."});}
+-class RedisOrderRepository{constructor({url=process.env.KV_REST_API_URL,token=process.env.KV_REST_API_TOKEN}={}){if(!url||!token)throw datastoreUnavailable("DURABLE_ORDER_STORE_NOT_CONFIGURED");this.url=url.replace(/\/$/,"");this.token=token;}async command(...args){try{const response=await fetch(this.url,{method:"POST",headers:{authorization:`Bearer ${this.token}`,'content-type':'application/json'},body:JSON.stringify(args)});if(!response.ok)throw datastoreUnavailable();const body=await response.json();return body.result;}catch(error){if(error.publicCode==="DATASTORE_UNAVAILABLE")throw error;throw datastoreUnavailable();}}async create(order,key){const idempotencyKey=`order-idempotency:${key}`,orderKey=`order:${order.orderId}`,script="local existing=redis.call('GET',KEYS[1]); if existing then return existing end; redis.call('SET',KEYS[2],ARGV[1]); redis.call('SET',KEYS[1],ARGV[2],'EX',86400); redis.call('SADD','orders',ARGV[2]); return ARGV[2]";const storedId=await this.command("EVAL",script,2,idempotencyKey,orderKey,JSON.stringify(order),order.orderId);return storedId===order.orderId?order:this.get(storedId);}async save(order){if(!await this.get(order.orderId))throw new Error("ORDER_NOT_FOUND");await this.command("SET",`order:${order.orderId}`,JSON.stringify(order));return order;}async get(id){const value=await this.command("GET",`order:${id}`);return value?JSON.parse(value):null;}async list(){const ids=await this.command("SMEMBERS","orders")||[];return Promise.all(ids.map(id=>this.get(id)));}async createProvider(provider){const unique=[[`provider:cpf:${provider.cpf}`,provider.providerId],[`provider:email:${provider.email}`,provider.providerId],[`provider:phone:${provider.phone}`,provider.providerId]];for(const [key] of unique)if(await this.command("GET",key))throw Object.assign(new Error("DUPLICATE_PROVIDER_IDENTITY"),{statusCode:409});for(const [key,value] of unique)await this.command("SET",key,value);return this.saveProvider(provider);}async getRegistrationIdempotency(key){return this.command("GET",`provider-registration-idempotency:${key}`);}async setRegistrationIdempotency(key,providerId,ttlMs){await this.command("SET",`provider-registration-idempotency:${key}`,providerId,"PX",ttlMs);}async saveProvider(provider){await this.command("SET",`provider:${provider.providerId}`,JSON.stringify(provider));await this.command("SADD","providers",provider.providerId);return provider;}async getProvider(id){const value=await this.command("GET",`provider:${id}`);return value?JSON.parse(value):null;}async listProviders(){const ids=await this.command("SMEMBERS","providers")||[];return Promise.all(ids.map(id=>this.getProvider(id)));}}
++class RedisOrderRepository{constructor({url=process.env.KV_REST_API_URL,token=process.env.KV_REST_API_TOKEN}={}){if(!url||!token)throw datastoreUnavailable("DURABLE_ORDER_STORE_NOT_CONFIGURED");this.url=url.replace(/\/$/,"");this.token=token;}async command(...args){try{const response=await fetch(this.url,{method:"POST",headers:{authorization:`Bearer ${this.token}`,'content-type':'application/json'},body:JSON.stringify(args)});if(!response.ok)throw datastoreUnavailable();const body=await response.json();if(body.error)throw datastoreUnavailable();return body.result;}catch(error){if(error.publicCode==="DATASTORE_UNAVAILABLE")throw error;throw datastoreUnavailable();}}async create(order,key){const idempotencyKey=`order-idempotency:${key}`,orderKey=`order:${order.orderId}`,script="local existing=redis.call('GET',KEYS[1]); if existing then return existing end; redis.call('SET',KEYS[2],ARGV[1]); redis.call('SET',KEYS[1],ARGV[2],'EX',86400); redis.call('SADD','orders',ARGV[2]); return ARGV[2]";const storedId=await this.command("EVAL",script,2,idempotencyKey,orderKey,JSON.stringify(order),order.orderId);return storedId===order.orderId?order:this.get(storedId);}async save(order){return require("./order-mutations").saveRedisOrder.call(this,order);}async mutateOrder(id,fn){return require("./order-mutations").redisMutateOrder.call(this,id,fn);}async get(id){const value=await this.command("GET",`order:${id}`);return value?JSON.parse(value):null;}async list(){const ids=await this.command("SMEMBERS","orders")||[];return Promise.all(ids.map(id=>this.get(id)));}async createProvider(provider){const unique=[[`provider:cpf:${provider.cpf}`,provider.providerId],[`provider:email:${provider.email}`,provider.providerId],[`provider:phone:${provider.phone}`,provider.providerId]];for(const [key] of unique)if(await this.command("GET",key))throw Object.assign(new Error("DUPLICATE_PROVIDER_IDENTITY"),{statusCode:409});for(const [key,value] of unique)await this.command("SET",key,value);return this.saveProvider(provider);}async getRegistrationIdempotency(key){return this.command("GET",`provider-registration-idempotency:${key}`);}async setRegistrationIdempotency(key,providerId,ttlMs){await this.command("SET",`provider-registration-idempotency:${key}`,providerId,"PX",ttlMs);}async saveProvider(provider){await this.command("SET",`provider:${provider.providerId}`,JSON.stringify(provider));await this.command("SADD","providers",provider.providerId);return provider;}async getProvider(id){const value=await this.command("GET",`provider:${id}`);return value?JSON.parse(value):null;}async listProviders(){const ids=await this.command("SMEMBERS","providers")||[];return Promise.all(ids.map(id=>this.getProvider(id)));}}
+ let repository;
+ function productionRepository(){return repository||(repository=new RedisOrderRepository());}
+ module.exports={MemoryOrderRepository,RedisOrderRepository,productionRepository,datastoreUnavailable};
+diff --git a/server/order-service.js b/server/order-service.js
+index 462c6cf..c6c9409 100644
+--- a/server/order-service.js
++++ b/server/order-service.js
+@@ -10,7 +10,7 @@ const states=new Set(["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS
+ function bad(code){throw Object.assign(new Error(code),{statusCode:400});}
+ function assertText(value,name,max=500){if(typeof value!=="string"||!value.trim()||value.length>max)bad(`INVALID_${name.toUpperCase()}`);return value.trim();}
+ function assertLocation(location){if(location==null)return null;if(typeof location!=="object"||location.consent!==true||typeof location.latitude!=="number"||typeof location.longitude!=="number"||!Number.isFinite(location.latitude)||!Number.isFinite(location.longitude)||location.latitude< -90||location.latitude>90||location.longitude< -180||location.longitude>180)bad("INVALID_LOCATION_COORDINATES");return{latitude:location.latitude,longitude:location.longitude,accuracy:Number.isFinite(location.accuracy)&&location.accuracy>=0?location.accuracy:null,capturedAt:location.capturedAt||new Date().toISOString(),source:"ONE_TIME_LOCATION",consent:true};}
+-function publicOrderView(order){return Object.freeze({orderId:order.orderId,protocol:order.protocol,serviceCode:order.serviceId,serviceName:order.serviceName,category:order.category,pricingMode:order.pricingMode,price:order.pricingMode!=="QUOTE"?{amountCents:order.pricingSnapshot.customerFinalTotalCents,currency:"BRL",isStartingAt:order.pricingMode==="FROM"}:null,status:order.status,scheduledAt:order.scheduledAt,createdAt:order.createdAt,catalogVersion:order.catalogVersion});}
++function publicOrderView(order){return Object.freeze({orderId:order.orderId,protocol:order.protocol,serviceCode:order.serviceId,serviceName:order.serviceName,category:order.category,pricingMode:order.pricingMode,price:order.pricingMode!=="QUOTE"?{amountCents:order.pricingSnapshot.customerFinalTotalCents,currency:"BRL",isStartingAt:order.pricingMode==="FROM"}:null,status:order.status,changeOrder:order.changeOrder&&["PLATFORM_REVIEW","APPLIED","CUSTOMER_REJECTED"].includes(order.changeOrder.status)?{changeOrderId:order.changeOrder.changeOrderId,status:order.changeOrder.status,amountCents:order.changeOrder.amountCents,reason:order.changeOrder.reason}:null,quoteStatus:order.quoteStatus,quote:order.quote&&["CUSTOMER_QUOTE_SENT","CUSTOMER_APPROVED","PROVIDER_AUTHORIZED","SERVICE_STARTED","SERVICE_COMPLETED","CUSTOMER_REJECTED"].includes(order.quoteStatus)?{quoteId:order.quote.quoteId,amountCents:order.quote.amountCents,currency:"BRL",description:order.quote.description}:null,scheduledAt:order.scheduledAt,createdAt:order.createdAt,catalogVersion:order.catalogVersion});}
+ async function createCustomerOrder(input,{repository,idempotencyKey,privateFileStorage}){
+  if(!idempotencyKey)bad("IDEMPOTENCY_KEY_REQUIRED");
+  const service=getServiceByCode(input?.serviceCode);if(!service)bad("UNKNOWN_OFFICIAL_SERVICE");
+diff --git a/server/schedule-repository.js b/server/schedule-repository.js
+index 0a7d817..1788656 100644
+--- a/server/schedule-repository.js
++++ b/server/schedule-repository.js
+@@ -62,8 +62,10 @@ class ScheduleRepository extends RedisOrderRepository {
+       const result = await fn(state, {
+         order: (id) => read(`order:${id}`),
+         provider: (id) => read(`provider:${id}`),
+-        saveOrder: (order) =>
+-          writes.set(`order:${order.orderId}`, JSON.stringify(order)),
++        saveOrder: (order) => {
++          order.version = (order.version || 0) + 1;
++          writes.set(`order:${order.orderId}`, JSON.stringify(order));
++        },
+       });
+       state.revision++;
+       if (Buffer.byteLength(JSON.stringify(state)) > 8_000_000)
+diff --git a/server/schedule-service.js b/server/schedule-service.js
+index 7f56710..104d3d7 100644
+--- a/server/schedule-service.js
++++ b/server/schedule-service.js
+@@ -169,6 +169,8 @@ const EVENTS = [
+   "RESCHEDULE",
+   "CANCELLED",
+   "COMPLETED",
++  "VISIT_COMPLETED",
++  "EXECUTION_COMPLETED",
+   "AFTER_SALES",
+ ];
+ const LABELS = {
+@@ -182,14 +184,21 @@ const LABELS = {
+   EXECUTION_REMINDER: "Lembrete de execução",
+   RESCHEDULE: "Solicitação de reagendamento registrada",
+   CANCELLED: "Agendamento cancelado",
+-  COMPLETED: "Serviço concluído",
++  COMPLETED: "Compromisso concluído",
++  VISIT_COMPLETED:
++    "Visita técnica concluída; avaliação registrada para elaboração do orçamento",
++  EXECUTION_COMPLETED: "Execução do serviço concluída",
+   AFTER_SALES: "Como foi seu atendimento?",
+ };
+ function message(event, a) {
++  if (event === "COMPLETED")
++    event = a.type === "VISIT" ? "VISIT_COMPLETED" : "EXECUTION_COMPLETED";
+   if (!EVENTS.includes(event)) fail("INVALID_NOTIFICATION", 400);
+   return `Reforma Profissional — ${LABELS[event]}. Protocolo ${a.protocol}. ${a.slots?.length ? a.slots.map((s) => new Intl.DateTimeFormat("pt-BR", { timeZone: ZONE, dateStyle: "short", timeStyle: "short" }).format(new Date(s.start))).join(", ") + " (Brasília). " : ""}Consulte os detalhes no acompanhamento seguro. ${a.status !== "CONFIRMED" && ["PROVIDER_CONSULTED", "REQUEST_RECEIVED", "RESCHEDULE"].includes(event) ? "O horário ainda depende das confirmações necessárias." : ""}`;
+ }
+ function notify(state, event, a, now) {
++  if (event === "COMPLETED")
++    event = a.type === "VISIT" ? "VISIT_COMPLETED" : "EXECUTION_COMPLETED";
+   state.notifications.push({
+     id: crypto.randomUUID(),
+     appointmentId: a.id,
+@@ -253,6 +262,7 @@ class ScheduleService {
+         ),
+       );
+     return {
++      ...(actor.role === "ADMIN" ? { revision: state.revision } : {}),
+       timeZone: ZONE,
+       appointments: items,
+       notifications: state.notifications.filter(
+@@ -481,6 +491,7 @@ class ScheduleService {
+         "CANCELLED",
+         "CUSTOMER_REJECTED",
+         "SERVICE_COMPLETED",
++        "SERVICE_STARTED",
+         "CLOSED",
+         "DISPUTED",
+         "PROVIDER_PAID",
+@@ -498,10 +509,25 @@ class ScheduleService {
+       fail("APPROVED_QUOTE_AND_CONTRACT_REQUIRED");
+   }
+   async mutate(actor, action, input = {}) {
+-    const now = this.clock();
+     return this.repo.transaction(async (state, refs) => {
++      const now = this.clock();
+       const admin = actor.role === "ADMIN",
+         provider = actor.role === "PROVIDER";
++      if (
++        admin &&
++        ["rule", "qualification", "availability", "plan", "proposal"].includes(
++          action,
++        )
++      ) {
++        if (
++          !Number.isInteger(input.expectedRevision) ||
++          input.expectedRevision < 0
++        )
++          fail("REVISION_REQUIRED", 400);
++        if (input.expectedRevision !== state.revision)
++          fail("STALE_SCHEDULE_CONFIGURATION");
++      }
++      input = { ...input };
+       if (action === "rule") {
+         if (!admin) fail("FORBIDDEN", 403);
+         const s = getServiceByCode(input.serviceCode);
+@@ -623,6 +649,16 @@ class ScheduleService {
+         if (!admin) fail("FORBIDDEN", 403);
+         const order = await refs.order(input.orderId);
+         if (!order) fail("ORDER_NOT_FOUND", 404);
++        if (
++          [
++            "SERVICE_STARTED",
++            "SERVICE_COMPLETED",
++            "CANCELLED",
++            "CLOSED",
++            "DISPUTED",
++          ].includes(order.status)
++        )
++          fail("ORDER_NOT_SCHEDULABLE");
+         const rule = ruleFor(state, order);
+         if (
+           !["VISIT", "REMOTE", "DIRECT"].includes(input.mode) ||
+@@ -1056,8 +1092,10 @@ class ScheduleService {
+         if (
+           !provider ||
+           a.status !== "CONFIRMED" ||
+-          now < Date.parse(a.slots[0].start) ||
+-          now >= Date.parse(a.slots.at(-1).end)
++          !a.slots.some(
++            (slot) =>
++              now >= Date.parse(slot.start) && now < Date.parse(slot.end),
++          )
+         )
+           fail("INVALID_START");
+         if (a.type === "EXECUTION") {
+@@ -1141,10 +1179,26 @@ class ScheduleService {
+           ];
+           refs.saveOrder(order);
+         }
+-        event = "COMPLETED";
++        event = a.type === "VISIT" ? "VISIT_COMPLETED" : "EXECUTION_COMPLETED";
+       } else if (action === "notification") {
+         if (!admin) fail("FORBIDDEN", 403);
++        if (input.event === "COMPLETED")
++          input = {
++            ...input,
++            event:
++              a.type === "VISIT" ? "VISIT_COMPLETED" : "EXECUTION_COMPLETED",
++          };
+         if (!EVENTS.includes(input.event)) fail("INVALID_NOTIFICATION", 400);
++        if (
++          input.event === "VISIT_COMPLETED" &&
++          (a.type !== "VISIT" || a.status !== "COMPLETED")
++        )
++          fail("NOTIFICATION_STATE_MISMATCH");
++        if (
++          ["EXECUTION_COMPLETED", "AFTER_SALES"].includes(input.event) &&
++          (a.type !== "EXECUTION" || a.status !== "COMPLETED")
++        )
++          fail("NOTIFICATION_STATE_MISMATCH");
+         if (
+           ["VISIT_CONFIRMED", "VISIT_REMINDER"].includes(input.event) &&
+           (a.type !== "VISIT" || a.status !== "CONFIRMED")
+diff --git a/test-support/schedule-fixture.js b/test-support/schedule-fixture.js
+index 827ec9a..c544a8c 100644
+--- a/test-support/schedule-fixture.js
++++ b/test-support/schedule-fixture.js
+@@ -20,7 +20,10 @@ class MemoryScheduleRepository extends MemoryOrderRepository {
+       const value = await fn(state, {
+         order: (id) => this.get(id),
+         provider: (id) => this.getProvider(id),
+-        saveOrder: (o) => writes.push(o),
++        saveOrder: (o) => {
++          o.version = (o.version || 0) + 1;
++          writes.push(o);
++        },
+       });
+       state.revision++;
+       for (const order of writes) await this.save(order);
+@@ -42,6 +45,11 @@ async function fixture(
+ ) {
+   let now = Date.parse("2030-01-07T12:00:00Z");
+   const service = new ScheduleService(repo, { clock: () => now });
++  const adminMutate = async (action, input) =>
++    service.mutate(admin, action, {
++      expectedRevision: (await repo.read()).revision,
++      ...input,
++    });
+   for (const providerId of ["p1", "p2", "p3"])
+     await repo.saveProvider({
+       providerId,
+@@ -81,7 +89,7 @@ async function fixture(
+       },
+       "key-" + id,
+     );
+-  await service.mutate(admin, "rule", {
++  await adminMutate("rule", {
+     serviceCode: catalog.code,
+     mode,
+     visitMinutes: 60,
+@@ -92,7 +100,7 @@ async function fixture(
+     reason: "Teste automatizado",
+   });
+   for (const id of ["p1", "p2", "p3"]) {
+-    await service.mutate(admin, "qualification", {
++    await adminMutate("qualification", {
+       providerId: id,
+       serviceCodes: [catalog.code],
+       specialty: "ELETRICISTA",
+@@ -112,7 +120,7 @@ async function fixture(
+     });
+   }
+   for (const orderId of ["o1", "o2"])
+-    await service.mutate(admin, "plan", {
++    await adminMutate("plan", {
+       orderId,
+       mode,
+       durationMinutes: duration,
+@@ -135,6 +143,7 @@ async function fixture(
+   return {
+     repo,
+     service,
++    adminMutate,
+     book,
+     action,
+     admin,
+diff --git a/test-support/schedule-mobile.py b/test-support/schedule-mobile.py
+index 9316536..aef51c9 100644
+--- a/test-support/schedule-mobile.py
++++ b/test-support/schedule-mobile.py
+@@ -48,10 +48,40 @@ try:
+             assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth'), 'CAC overflow'
+             page.get_by_text('Regras e habilitações — configuração autorizada do CAC', exact=True).click()
+             assert page.get_by_role('button', name='Registrar regra', exact=True).is_visible()
++            form = page.locator('[data-form="rule"]')
++            values = {'serviceCode': 'RP0001', 'mode': 'VISIT', 'visitMinutes': '60', 'travelMinutes': '30', 'holdMinutes': '1440', 'cancelBeforeMinutes': '60', 'source': 'TEST POLICY ONLY', 'reason': 'Teste de revisão administrativa'}
++            for name, value in values.items():
++                if name == 'mode':
++                    form.locator('[name="mode"]').select_option(value)
++                else:
++                    form.locator('[name="' + name + '"]').fill(value)
++            with page.expect_response(lambda response: response.url.endswith('/api/admin/agenda') and response.request.method == 'POST') as response_info:
++                form.get_by_role('button', name='Registrar regra', exact=True).click()
++            response = response_info.value
++            assert response.status == 200
++            assert isinstance(response.request.post_data_json.get('expectedRevision'), int)
++            page.locator('#cac-agenda [data-message]').filter(has_text='Agenda atualizada.').wait_for()
++            page.get_by_text('Regras e habilitações — configuração autorizada do CAC', exact=True).click()
++            for name, value in values.items():
++                control = page.locator('[data-form="rule"] [name="' + name + '"]')
++                if name == 'mode':
++                    control.select_option(value)
++                else:
++                    control.fill(value)
++            page.evaluate("""async token => {
++                const headers = {authorization: 'Bearer ' + token, 'content-type': 'application/json'};
++                const state = await fetch('/api/admin/agenda', {headers}).then(r => r.json());
++                const response = await fetch('/api/admin/agenda', {method: 'POST', headers, body: JSON.stringify({action: 'rule', expectedRevision: state.revision, serviceCode: 'RP0001', ...state.rules.RP0001, source: 'Alteração concorrente', reason: 'Teste em outra sessão'})});
++                if (!response.ok) throw new Error('Fixture concurrent update failed');
++            }""", sessions['tokens']['admin'])
++            with page.expect_response(lambda response: response.url.endswith('/api/admin/agenda') and response.request.method == 'POST') as stale_response_info:
++                page.locator('[data-form="rule"]').get_by_role('button', name='Registrar regra', exact=True).click()
++            assert stale_response_info.value.status == 409
++            page.locator('#cac-agenda [data-message]').filter(has_text='A configuração mudou desde sua leitura').wait_for()
+             page.screenshot(path=f'/tmp/reforma-agenda-cac-{width}.png', full_page=True)
+             context.close()
+         browser.close()
+-    print('PASS: cliente, profissional, aceite real pela API de teste, CAC mensal e formulários; 390 e 1280 px, sem overflow.')
++    print('PASS: cliente, profissional, aceite real pela API de teste, CAC mensal, envio de revisão e rejeição 409 de edição desatualizada; 390 e 1280 px, sem overflow.')
+ finally:
+     server.terminate()
+     server.wait(timeout=5)
+diff --git a/test/go-live-remediation.test.js b/test/go-live-remediation.test.js
+index 5c947c5..49d4c32 100644
+--- a/test/go-live-remediation.test.js
++++ b/test/go-live-remediation.test.js
+@@ -10,9 +10,9 @@ const fakeStorage={async put(){return{evidenceId:"EVD-PERSISTED",mimeType:"image
+ 
+ test("POST /api/orders persists FIXED, FROM and QUOTE, server pricing, evidence, legal acceptance and idempotency across repository restart",async()=>{const dir=fs.mkdtempSync(path.join(os.tmpdir(),"rp-orders-")),file=path.join(dir,"store.json");let repository=new FileRepository(file);for(const [code,mode] of [["RP0001","FIXED"],["RP0023","FROM"],["RP0012","QUOTE"]]){const limiter=new MemoryRateLimiter(),handler=createOrdersHandler({repository,privateFileStorage:fakeStorage,rateLimiter:limiter}),key=`key-${mode}`;const first=await invoke(handler,{method:"POST",headers:{"content-type":"application/json","idempotency-key":key},body:input(code)});assert.equal(first.statusCode,201);const duplicate=await invoke(handler,{method:"POST",headers:{"content-type":"application/json","idempotency-key":key},body:{...input(code),customerPriceCents:999999}});assert.equal(duplicate.body.orderId,first.body.orderId);let stored=await repository.get(first.body.orderId);assert.equal(stored.pricingMode,mode);assert.equal(stored.evidenceId,"EVD-PERSISTED");assert.match(stored.termsAcceptance.acceptanceEvidenceId,/^ACE-/);assert.equal(stored.status,"REQUESTED");assert.equal(stored.pricingSnapshot?.customerPriceCents,mode==="QUOTE"?undefined:(mode==="FIXED"?14990:19990));assert.notDeepEqual(stored.pricingSnapshot,{forged:true});repository=new FileRepository(file);stored=await repository.get(first.body.orderId);assert.equal(stored.orderId,first.body.orderId);assert.ok(stored.termsAcceptance.acceptedAt);}});
+ 
+-test("complete customer/admin/provider/finance operation persists and enforces quote and fiscal gates",async()=>{const repository=new MemoryOrderRepository();await repository.saveProvider({providerId:"PRO-1",name:"Prestador",onboardingStatus:"APPROVED"});await repository.saveProvider({providerId:"PRO-2",name:"Outro",onboardingStatus:"APPROVED"});const {order}=await createCustomerOrder({...input("RP0012"),photo:undefined},{repository,idempotencyKey:"flow"});const id=order.orderId,admin={sub:"ADM-1",role:"ADMIN"};await ops.assignProvider(repository,id,"PRO-1","ADMIN:ADM-1");assert.equal((await repository.get(id)).status,"OFFERED");await assert.rejects(()=>ops.providerAction(repository,id,"PRO-2","accept"),/FORBIDDEN/);await ops.providerAction(repository,id,"PRO-1","accept");await assert.rejects(()=>ops.providerAction(repository,id,"PRO-1","start"),/NOT_AUTHORIZED/);await ops.providerAction(repository,id,"PRO-1","quote",{amountCents:25000,description:"Escopo"});assert.equal((await repository.get(id)).quoteStatus,"PROVIDER_QUOTE_SUBMITTED");await ops.adminAction(repository,id,"approve-quote",{},admin);await ops.customerQuoteDecision(repository,id,order.customerId,"APPROVE");await ops.adminAction(repository,id,"authorize-service",{},admin);await ops.providerAction(repository,id,"PRO-1","start");await ops.createChangeOrder(repository,id,"PRO-1",{amountCents:3000,reason:"Item adicional"});assert.equal((await repository.get(id)).approvedAdditionalAmountCents,undefined);await ops.adminAction(repository,id,"review-change-order",{decision:"APPROVE"},admin);await ops.customerChangeDecision(repository,id,order.customerId,"APPROVE");assert.equal((await repository.get(id)).approvedAdditionalAmountCents,3000);await ops.providerAction(repository,id,"PRO-1","complete");await ops.providerAction(repository,id,"PRO-1","fiscal-document",{type:"NFS-e",number:"1",date:"2026-09-19",amountCents:25000,issuer:"Prestador",recipient:"Cliente",evidenceId:"EVD-FISCAL"});assert.equal((await repository.get(id)).providerPaymentStatus,"PENDING");await ops.reviewFiscal(repository,id,{sub:"FIN-1",role:"FINANCE"},{decision:"APPROVE",reasonCode:"VALID"});const final=await repository.get(id);assert.deepEqual(final.quoteHistory,ops.QUOTE_FLOW);assert.equal(final.fiscalStatus,"FISCAL_DOCUMENT_APPROVED");assert.equal(final.providerPaymentStatus,"READY");assert.equal(final.status,"SERVICE_COMPLETED");});
++test("complete customer/admin/provider/finance operation persists and enforces quote and fiscal gates",async()=>{const repository=new MemoryOrderRepository();await repository.saveProvider({providerId:"PRO-1",name:"Prestador",onboardingStatus:"APPROVED"});await repository.saveProvider({providerId:"PRO-2",name:"Outro",onboardingStatus:"APPROVED"});const {order}=await createCustomerOrder({...input("RP0012"),photo:undefined},{repository,idempotencyKey:"flow"});const id=order.orderId,admin={sub:"ADM-1",role:"ADMIN"};await ops.assignProvider(repository,id,"PRO-1","ADMIN:ADM-1");assert.equal((await repository.get(id)).status,"OFFERED");await assert.rejects(()=>ops.providerAction(repository,id,"PRO-2","accept"),/FORBIDDEN/);await ops.providerAction(repository,id,"PRO-1","accept");await assert.rejects(()=>ops.providerAction(repository,id,"PRO-1","start"),/NOT_AUTHORIZED/);await ops.providerAction(repository,id,"PRO-1","quote",{amountCents:25000,description:"Escopo"});assert.equal((await repository.get(id)).quoteStatus,"PROVIDER_QUOTE_SUBMITTED");await ops.adminAction(repository,id,"approve-quote",{quoteId:(await repository.get(id)).quote.quoteId},admin);await ops.customerQuoteDecision(repository,id,order.customerId,"APPROVE",(await repository.get(id)).quote.quoteId);await ops.adminAction(repository,id,"authorize-service",{quoteId:(await repository.get(id)).quote.quoteId},admin);await ops.providerAction(repository,id,"PRO-1","start");await ops.createChangeOrder(repository,id,"PRO-1",{amountCents:3000,reason:"Item adicional"});assert.equal((await repository.get(id)).approvedAdditionalAmountCents,undefined);await ops.adminAction(repository,id,"review-change-order",{decision:"APPROVE",changeOrderId:(await repository.get(id)).changeOrder.changeOrderId},admin);await ops.customerChangeDecision(repository,id,order.customerId,"APPROVE",(await repository.get(id)).changeOrder.changeOrderId);assert.equal((await repository.get(id)).approvedAdditionalAmountCents,3000);await ops.providerAction(repository,id,"PRO-1","complete");await ops.providerAction(repository,id,"PRO-1","fiscal-document",{type:"NFS-e",number:"1",date:"2026-09-19",amountCents:25000,issuer:"Prestador",recipient:"Cliente",evidenceId:"EVD-FISCAL"});assert.equal((await repository.get(id)).providerPaymentStatus,"PENDING");await ops.reviewFiscal(repository,id,{sub:"FIN-1",role:"FINANCE"},{decision:"APPROVE",reasonCode:"VALID"});const final=await repository.get(id);assert.deepEqual(final.quoteHistory,ops.QUOTE_FLOW);assert.equal(final.fiscalStatus,"FISCAL_DOCUMENT_APPROVED");assert.equal(final.providerPaymentStatus,"READY");assert.equal(final.status,"SERVICE_COMPLETED");});
+ 
+-test("quote rejection and change-order rejection do not apply amounts",async()=>{const repository=new MemoryOrderRepository();await repository.saveProvider({providerId:"P",onboardingStatus:"APPROVED"});const {order}=await createCustomerOrder({...input("RP0012"),photo:undefined},{repository,idempotencyKey:"reject"});await ops.assignProvider(repository,order.orderId,"P","ADMIN:A");await ops.providerAction(repository,order.orderId,"P","accept");await ops.providerAction(repository,order.orderId,"P","quote",{amountCents:10000});await ops.adminAction(repository,order.orderId,"approve-quote",{},{sub:"A",role:"ADMIN"});await ops.customerQuoteDecision(repository,order.orderId,order.customerId,"REJECT");assert.equal((await repository.get(order.orderId)).quoteStatus,"CUSTOMER_REJECTED");});
++test("quote rejection and change-order rejection do not apply amounts",async()=>{const repository=new MemoryOrderRepository();await repository.saveProvider({providerId:"P",onboardingStatus:"APPROVED"});const {order}=await createCustomerOrder({...input("RP0012"),photo:undefined},{repository,idempotencyKey:"reject"});await ops.assignProvider(repository,order.orderId,"P","ADMIN:A");await ops.providerAction(repository,order.orderId,"P","accept");await ops.providerAction(repository,order.orderId,"P","quote",{amountCents:10000});await ops.adminAction(repository,order.orderId,"approve-quote",{quoteId:(await repository.get(order.orderId)).quote.quoteId},{sub:"A",role:"ADMIN"});await ops.customerQuoteDecision(repository,order.orderId,order.customerId,"REJECT",(await repository.get(order.orderId)).quote.quoteId);assert.equal((await repository.get(order.orderId)).quoteStatus,"CUSTOMER_REJECTED");});
+ 
+ test("provider/admin APIs are session protected, owner filtered and role separated",async()=>{const repository=new MemoryOrderRepository();await repository.saveProvider({providerId:"P1",onboardingStatus:"APPROVED",backgroundCheck:{status:"UNDER_REVIEW",evidenceId:"SECRET"}});await repository.saveProvider({providerId:"P2",onboardingStatus:"APPROVED"});const a=await createCustomerOrder({...input("RP0001"),photo:undefined},{repository,idempotencyKey:"a"}),b=await createCustomerOrder({...input("RP0001"),photo:undefined},{repository,idempotencyKey:"b"});await ops.assignProvider(repository,a.order.orderId,"P1","ADMIN");await ops.assignProvider(repository,b.order.orderId,"P2","ADMIN");const pt=signSession({sub:"P1",role:"PROVIDER"},{secretValue:secret}),at=signSession({sub:"A",role:"ADMIN"},{secretValue:secret}),ft=signSession({sub:"F",role:"FINANCE"},{secretValue:secret});let res=await invoke(providerHandler({repository,secretValue:secret}),{token:pt,query:{route:"opportunities"}});assert.equal(res.statusCode,200);assert.deepEqual(res.body.orders.map(o=>o.orderId),[a.order.orderId]);res=await invoke(adminHandler({repository,secretValue:secret}),{token:pt,query:{route:"orders"}});assert.equal(res.statusCode,403);res=await invoke(fiscalReviewHandler({repository,secretValue:secret}),{method:"POST",token:at,query:{id:a.order.orderId},body:{decision:"APPROVE"}});assert.equal(res.statusCode,403);res=await invoke(adminHandler({repository,secretValue:secret}),{token:ft,query:{route:"orders"}});assert.equal(res.statusCode,403);res=await invoke(providerHandler({repository,secretValue:secret}),{token:pt,query:{route:"profile"}});assert.equal(JSON.stringify(res.body).includes("SECRET"),false);});
+ 
+diff --git a/test/schedule-api.test.js b/test/schedule-api.test.js
+index 3e3b0e1..0e93c86 100644
+--- a/test/schedule-api.test.js
++++ b/test/schedule-api.test.js
+@@ -87,6 +87,7 @@ test("API: orçamento oficial aprovado pelo cliente antes da reserva; versão de
+     method: "POST",
+     input: {
+       action: "proposal",
++      expectedRevision: (await f.repo.read()).revision,
+       orderId: "o1",
+       amountCents: 1,
+       description: "Troca conforme tabela",
+diff --git a/test/schedule.test.js b/test/schedule.test.js
+index ddee629..f9c59ff 100644
+--- a/test/schedule.test.js
++++ b/test/schedule.test.js
+@@ -131,7 +131,7 @@ test("orçamento não aprovado e materiais pendentes impedem execução", async
+   await assert.rejects(f.book(), error("APPROVED_QUOTE_AND_CONTRACT_REQUIRED"));
+   o.quoteStatus = "CUSTOMER_APPROVED";
+   await f.repo.save(o);
+-  await f.service.mutate(admin, "plan", {
++  await f.adminMutate("plan", {
+     orderId: "o1",
+     mode: "DIRECT",
+     durationMinutes: 60,
+diff --git a/server/order-mutations.js b/server/order-mutations.js
+new file mode 100644
+index 0000000..27d085a
+--- /dev/null
++++ b/server/order-mutations.js
+@@ -0,0 +1,69 @@
++"use strict";
++const queues = new WeakMap();
++function missing() {
++  throw Object.assign(new Error("ORDER_NOT_FOUND"), { statusCode: 404 });
++}
++async function redisMutateOrder(id, fn) {
++  // Reuse the SAME calendar/document CAS for every legacy OS mutation.
++  const { ScheduleRepository } = require("./schedule-repository");
++  return ScheduleRepository.prototype.transaction.call(
++    this,
++    async (state, refs) => {
++      const order = await refs.order(id);
++      if (!order) missing();
++      const updated = await fn(order, state, refs);
++      refs.saveOrder(updated);
++      return updated;
++    },
++  );
++}
++async function memoryMutateOrder(id, fn) {
++  if (typeof this.transaction === "function")
++    return this.transaction(async (state, refs) => {
++      const order = await refs.order(id);
++      if (!order) missing();
++      const updated = await fn(order, state, refs);
++      refs.saveOrder(updated);
++      return updated;
++    });
++  const result = (queues.get(this) || Promise.resolve()).then(async () => {
++    const order = await this.get(id);
++    if (!order) missing();
++    const updated = await fn(order, null, {
++      provider: (id) => this.getProvider(id),
++    });
++    updated.version = (order.version || 0) + 1;
++    return this.save(updated);
++  });
++  queues.set(
++    this,
++    result.catch(() => {}),
++  );
++  return result;
++}
++const SAVE_ORDER = `local raw=redis.call('GET',KEYS[1]); if not raw then return -1 end
++local old=cjson.decode(raw);if (old.version or 0)~=tonumber(ARGV[1]) then return 0 end
++redis.call('SET',KEYS[1],ARGV[2]);return 1`;
++async function saveRedisOrder(order) {
++  if (!order?.orderId) missing();
++  const expected = order.version || 0;
++  const updated = { ...order, version: expected + 1 };
++  const result = await this.command(
++    "EVAL",
++    SAVE_ORDER,
++    1,
++    `order:${order.orderId}`,
++    expected,
++    JSON.stringify(updated),
++  );
++  if (result === -1) missing();
++  if (result !== 1)
++    throw Object.assign(new Error("STALE_ORDER"), { statusCode: 409 });
++  return updated;
++}
++module.exports = {
++  redisMutateOrder,
++  memoryMutateOrder,
++  saveRedisOrder,
++  SAVE_ORDER,
++};
+diff --git a/test-support/isolated-redis.js b/test-support/isolated-redis.js
+new file mode 100644
+index 0000000..0eb6fd9
+--- /dev/null
++++ b/test-support/isolated-redis.js
+@@ -0,0 +1,68 @@
++"use strict";
++const { spawn, execFile } = require("node:child_process"),
++  { promisify } = require("node:util"),
++  fs = require("node:fs/promises"),
++  os = require("node:os"),
++  path = require("node:path");
++const { ScheduleRepository } = require("../server/schedule-repository");
++const exec = promisify(execFile);
++async function isolatedRedis(t) {
++  const server = process.env.REDIS_SERVER || "redis-server",
++    cli = process.env.REDIS_CLI || "redis-cli";
++  try {
++    await exec(server, ["--version"]);
++    await exec(cli, ["--version"]);
++  } catch {
++    t.skip("Integração exige redis-server e redis-cli isolados.");
++    return null;
++  }
++  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "rp-review-race-")),
++    socket = path.join(dir, "redis.sock"),
++    child = spawn(
++      server,
++      [
++        "--port",
++        "0",
++        "--unixsocket",
++        socket,
++        "--save",
++        "",
++        "--appendonly",
++        "no",
++        "--dir",
++        dir,
++      ],
++      { stdio: "ignore" },
++    );
++  t.after(async () => {
++    const exited = new Promise((resolve) => child.once("exit", resolve));
++    child.kill("SIGTERM");
++    await exited;
++    await fs.rm(dir, { recursive: true, force: true });
++  });
++  for (let i = 0; i < 100; i++) {
++    try {
++      await fs.access(socket);
++      break;
++    } catch {
++      await new Promise((r) => setTimeout(r, 20));
++    }
++  }
++  class LocalRepository extends ScheduleRepository {
++    constructor() {
++      super({ url: "http://unused", token: "test-only" });
++    }
++    async command(...args) {
++      const { stdout } = await exec(
++        cli,
++        ["--json", "-s", socket, ...args.map(String)],
++        { maxBuffer: 20000000 },
++      );
++      const result = JSON.parse(stdout);
++      if (result?.error) throw new Error("REDIS_ERROR");
++      return result;
++    }
++  }
++  return new LocalRepository();
++}
++module.exports = { isolatedRedis };
+diff --git a/test/review-corrections.test.js b/test/review-corrections.test.js
+new file mode 100644
+index 0000000..c4efdda
+--- /dev/null
++++ b/test/review-corrections.test.js
+@@ -0,0 +1,387 @@
++"use strict";
++const test = require("node:test"),
++  assert = require("node:assert/strict");
++const {
++  fixture,
++  admin,
++  customer,
++  professional,
++} = require("../test-support/schedule-fixture");
++const { MemoryOrderRepository } = require("../server/order-repository"),
++  ops = require("../server/operations-service");
++const { customerHandler, adminHandler } = require("../server/operations-api"),
++  { signSession } = require("../server/auth"),
++  { resolveOperationalPath } = require("../server/api-path");
++const secretValue = "TEST-ONLY-REVIEW-CORRECTIONS-SECRET-000";
++async function invoke(handler, claims, query, body, method = "POST") {
++  const req = {
++    method,
++    query,
++    body,
++    headers: {
++      authorization: "Bearer " + signSession(claims, { secretValue }),
++    },
++  };
++  const response = {
++    setHeader() {},
++    status(code) {
++      this.code = code;
++      return this;
++    },
++    json(body) {
++      this.body = body;
++    },
++  };
++  await handler(req, response);
++  return response;
++}
++async function adminInvoke(handler, repo, route, body) {
++  return invoke(handler, admin, route, {
++    expectedVersion: (await repo.get(route.id)).version || 0,
++    ...body,
++  });
++}
++async function quoted() {
++  const repo = new MemoryOrderRepository();
++  await repo.create(
++    {
++      orderId: "o",
++      customerId: customer.sub,
++      serviceId: "RP0012",
++      serviceName: "Curto-circuito",
++      pricingMode: "QUOTE",
++      quoteStatus: "CUSTOMER_QUOTE_SENT",
++      quoteHistory: ["CUSTOMER_QUOTE_SENT"],
++      quote: {
++        quoteId: "quote-current",
++        amountCents: 25000,
++        description: "Escopo revisado",
++      },
++      pricingSnapshot: { internalCanary: "NEVER_PUBLIC" },
++      auditTrail: [],
++    },
++    "only",
++  );
++  return repo;
++}
++test("regressão: rota antiga quote-decision exige quoteId atual e decisão explícita; resposta pública não vaza composição", async () => {
++  const repo = await quoted(),
++    handler = customerHandler({ repository: repo, secretValue }),
++    query = resolveOperationalPath("customer", [
++      "orders",
++      "o",
++      "quote-decision",
++    ]);
++  const before = await repo.get("o");
++  for (const [body, status] of [
++    [{ decision: "APPROVE" }, 400],
++    [{ decision: "APPROVE", quoteId: "quote-old" }, 409],
++    [{ decision: "UNEXPECTED", quoteId: "quote-current" }, 400],
++  ]) {
++    const r = await invoke(handler, customer, query, body);
++    assert.equal(r.code, status);
++    assert.deepEqual(await repo.get("o"), before);
++  }
++  const view = await invoke(
++    handler,
++    customer,
++    resolveOperationalPath("customer", ["orders", "o"]),
++    null,
++    "GET",
++  );
++  assert.equal(view.body.order.quote.quoteId, "quote-current");
++  const result = await invoke(handler, customer, query, {
++    decision: "APPROVE",
++    quoteId: "quote-current",
++  });
++  assert.equal(result.code, 200);
++  assert.equal(result.body.order.quoteStatus, "CUSTOMER_APPROVED");
++  assert.doesNotMatch(
++    JSON.stringify(result.body),
++    /NEVER_PUBLIC|pricingSnapshot|providerMinimum/,
++  );
++  assert.equal(
++    (await repo.get("o")).quote.customerDecision.quoteId,
++    "quote-current",
++  );
++});
++test("regressão: aprovação e autorização administrativas antigas recusam orçamento de outra versão", async () => {
++  const repo = await quoted();
++  let order = await repo.get("o");
++  order.quoteStatus = "PROVIDER_QUOTE_SUBMITTED";
++  await repo.save(order);
++  const handler = adminHandler({ repository: repo, secretValue });
++  let route = resolveOperationalPath("admin", ["order", "o", "approve-quote"]);
++  assert.equal(
++    (await adminInvoke(handler, repo, route, { quoteId: "old" })).code,
++    409,
++  );
++  assert.equal(
++    (await adminInvoke(handler, repo, route, { quoteId: "quote-current" }))
++      .code,
++    200,
++  );
++  await ops.customerQuoteDecision(
++    repo,
++    "o",
++    customer.sub,
++    "APPROVE",
++    "quote-current",
++  );
++  route = resolveOperationalPath("admin", ["order", "o", "authorize-service"]);
++  assert.equal(
++    (await adminInvoke(handler, repo, route, { quoteId: "old" })).code,
++    409,
++  );
++  assert.equal(
++    (await adminInvoke(handler, repo, route, { quoteId: "quote-current" }))
++      .code,
++    200,
++  );
++});
++const slots = [
++  { start: "2030-01-08T12:00:00Z", end: "2030-01-08T13:00:00Z" },
++  { start: "2030-01-09T12:00:00Z", end: "2030-01-09T13:00:00Z" },
++];
++async function confirmed(options = {}) {
++  const f = await fixture(undefined, options);
++  let a = (await f.book(options.duration === 120 ? { slots } : {})).appointment;
++  a = (await f.action(professional("p1"), "accept", a)).appointment;
++  return { ...f, a };
++}
++test("regressão: início não é permitido antes, no fim ou entre períodos reservados de vários dias", async () => {
++  for (const now of [
++    "2030-01-08T11:59:59Z",
++    "2030-01-08T13:00:00Z",
++    "2030-01-08T20:00:00Z",
++    "2030-01-09T11:59:59Z",
++    "2030-01-09T13:00:00Z",
++  ]) {
++    const f = await confirmed({ duration: 120 });
++    f.setNow(now);
++    const before = await f.repo.read(),
++      order = await f.repo.get("o1");
++    await assert.rejects(
++      f.action(professional("p1"), "start", f.a),
++      /INVALID_START/,
++    );
++    assert.deepEqual(await f.repo.read(), before);
++    assert.deepEqual(await f.repo.get("o1"), order);
++  }
++});
++test("regressão: início no começo e dentro do segundo período realmente reservado é aceito", async () => {
++  for (const now of [
++    "2030-01-08T12:00:00Z",
++    "2030-01-09T12:00:00Z",
++    "2030-01-09T12:59:59Z",
++  ]) {
++    const f = await confirmed({ duration: 120 });
++    f.setNow(now);
++    const r = await f.action(professional("p1"), "start", f.a);
++    assert.equal(r.appointment.status, "IN_PROGRESS");
++    assert.equal((await f.repo.get("o1")).status, "SERVICE_STARTED");
++  }
++});
++test("regressão: conclusão de visita emite VISIT_COMPLETED, sem concluir OS ou liberar pós-venda de execução", async () => {
++  const f = await confirmed({ mode: "VISIT" });
++  f.setNow("2030-01-08T12:00:00Z");
++  let a = (await f.action(professional("p1"), "start", f.a)).appointment;
++  a = (
++    await f.action(professional("p1"), "technical", a, {
++      conditions: "Ponto avaliado",
++      quantity: 1,
++      unit: "ponto",
++      materials: "Cliente fornecerá",
++      estimatedMinutes: 60,
++    })
++  ).appointment;
++  a = (await f.action(professional("p1"), "complete", a)).appointment;
++  let state = await f.repo.read();
++  assert.equal(state.notifications.at(-1).event, "VISIT_COMPLETED");
++  assert.match(state.notifications.at(-1).text, /Visita técnica concluída/);
++  assert.doesNotMatch(
++    state.notifications.at(-1).text,
++    /Execução do serviço concluída/,
++  );
++  assert.equal((await f.repo.get("o1")).status, "PROVIDER_ACCEPTED");
++  assert.equal((await f.repo.get("o1")).fiscalStatus, undefined);
++  await assert.rejects(
++    f.action(admin, "notification", a, {
++      reason: "Teste",
++      event: "AFTER_SALES",
++    }),
++    /NOTIFICATION_STATE_MISMATCH/,
++  );
++  await f.action(admin, "notification", a, {
++    reason: "Compatibilidade de mensagem antiga",
++    event: "COMPLETED",
++  });
++  state = await f.repo.read();
++  assert.equal(state.notifications.at(-1).event, "VISIT_COMPLETED");
++});
++test("regressão: conclusão de execução emite EXECUTION_COMPLETED e habilita mensagem de pós-venda", async () => {
++  const f = await confirmed();
++  f.setNow("2030-01-08T12:00:00Z");
++  let a = (await f.action(professional("p1"), "start", f.a)).appointment;
++  a = (await f.action(professional("p1"), "complete", a)).appointment;
++  const state = await f.repo.read();
++  assert.equal(state.notifications.at(-1).event, "EXECUTION_COMPLETED");
++  assert.match(
++    state.notifications.at(-1).text,
++    /Execução do serviço concluída/,
++  );
++  assert.equal((await f.repo.get("o1")).status, "SERVICE_COMPLETED");
++  await f.action(admin, "notification", a, {
++    reason: "Atendimento concluído",
++    event: "AFTER_SALES",
++  });
++});
++test("regressão: edição administrativa exige revisão lida e rejeita configuração desatualizada nas cinco ações", async () => {
++  const f = await fixture();
++  const read = await f.service.read(admin),
++    old = read.revision;
++  await f.adminMutate("rule", {
++    ...(await f.repo.read()).rules.RP0001,
++    serviceCode: "RP0001",
++    source: "Regra atualizada",
++    reason: "Revisão atual",
++  });
++  const before = await f.repo.read();
++  for (const action of [
++    "rule",
++    "qualification",
++    "availability",
++    "plan",
++    "proposal",
++  ]) {
++    await assert.rejects(
++      f.service.mutate(admin, action, { expectedRevision: old }),
++      /STALE_SCHEDULE_CONFIGURATION/,
++    );
++    await assert.rejects(
++      f.service.mutate(admin, action, {}),
++      /REVISION_REQUIRED/,
++    );
++    assert.deepEqual(await f.repo.read(), before);
++  }
++  assert.equal(before.rules.RP0001.source, "Regra atualizada");
++});
++test("regressão: cliente administrativo antigo não sobrescreve proposta mais recente", async () => {
++  const f = await fixture();
++  let order = await f.repo.get("o1");
++  order.quoteStatus = null;
++  await f.repo.save(order);
++  const expectedRevision = (await f.repo.read()).revision;
++  const first = await f.service.mutate(admin, "proposal", {
++    expectedRevision,
++    orderId: "o1",
++    description: "Escopo 1",
++    reason: "Avaliado",
++  });
++  await assert.rejects(
++    f.service.mutate(admin, "proposal", {
++      expectedRevision,
++      orderId: "o1",
++      description: "Escopo obsoleto",
++      reason: "Tela antiga",
++    }),
++    /STALE_SCHEDULE_CONFIGURATION/,
++  );
++  assert.equal((await f.repo.get("o1")).quote.quoteId, first.quote.quoteId);
++  assert.equal((await f.repo.get("o1")).quote.description, "Escopo 1");
++});
++test("regressão: ações antigas de iniciar e concluir não contornam plano da agenda, mesmo sem guarda no handler", async () => {
++  const f = await fixture();
++  await assert.rejects(
++    ops.providerAction(f.repo, "o1", "p1", "start"),
++    /USE_SCHEDULE_ACTION/,
++  );
++  await assert.rejects(
++    ops.providerAction(f.repo, "o1", "p1", "complete"),
++    /USE_SCHEDULE_ACTION/,
++  );
++});
++
++test("regressão: orçamento adicional antigo exige changeOrderId na revisão e no aceite", async () => {
++  const repo = await quoted();
++  const order = await repo.get("o");
++  order.status = "SERVICE_STARTED";
++  order.changeOrder = {
++    changeOrderId: "extra-current",
++    status: "CHANGE_ORDER_CREATED",
++    amountCents: 3000,
++    reason: "Escopo adicional",
++  };
++  await repo.save(order);
++  const adminRoute = resolveOperationalPath("admin", [
++      "order",
++      "o",
++      "review-change-order",
++    ]),
++    ah = adminHandler({ repository: repo, secretValue });
++  assert.equal(
++    (
++      await adminInvoke(ah, repo, adminRoute, {
++        decision: "APPROVE",
++        changeOrderId: "extra-old",
++      })
++    ).code,
++    409,
++  );
++  assert.equal(
++    (
++      await adminInvoke(ah, repo, adminRoute, {
++        decision: "APPROVE",
++        changeOrderId: "extra-current",
++      })
++    ).code,
++    200,
++  );
++  const route = resolveOperationalPath("customer", [
++      "orders",
++      "o",
++      "change-order-decision",
++    ]),
++    ch = customerHandler({ repository: repo, secretValue });
++  for (const [body, code] of [
++    [{ decision: "APPROVE" }, 400],
++    [{ decision: "APPROVE", changeOrderId: "extra-old" }, 409],
++    [{ decision: "UNKNOWN", changeOrderId: "extra-current" }, 400],
++  ])
++    assert.equal((await invoke(ch, customer, route, body)).code, code);
++  assert.equal((await repo.get("o")).approvedAdditionalAmountCents, undefined);
++  assert.equal(
++    (
++      await invoke(ch, customer, route, {
++        decision: "APPROVE",
++        changeOrderId: "extra-current",
++      })
++    ).code,
++    200,
++  );
++  assert.equal((await repo.get("o")).approvedAdditionalAmountCents, 3000);
++});
++
++test("regressão: atribuição administrativa antiga exige versão da OS e não sobrescreve outra edição", async () => {
++  const f = await fixture(),
++    handler = adminHandler({ repository: f.repo, secretValue }),
++    route = resolveOperationalPath("admin", ["order", "o1", "assign-provider"]);
++  assert.equal(
++    (await invoke(handler, admin, route, { providerId: "p1" })).code,
++    400,
++  );
++  const expectedVersion = (await f.repo.get("o1")).version || 0;
++  assert.equal(
++    (await invoke(handler, admin, route, { providerId: "p1", expectedVersion }))
++      .code,
++    200,
++  );
++  const after = await f.repo.get("o1");
++  assert.equal(
++    (await invoke(handler, admin, route, { providerId: "p2", expectedVersion }))
++      .code,
++    409,
++  );
++  assert.deepEqual(await f.repo.get("o1"), after);
++  assert.equal(after.providerId, "p1");
++});
+diff --git a/test/review-concurrency.test.js b/test/review-concurrency.test.js
+new file mode 100644
+index 0000000..78590d7
+--- /dev/null
++++ b/test/review-concurrency.test.js
+@@ -0,0 +1,143 @@
++"use strict";
++const test = require("node:test"),
++  assert = require("node:assert/strict"),
++  { isolatedRedis } = require("../test-support/isolated-redis");
++const {
++    fixture,
++    admin,
++    professional,
++  } = require("../test-support/schedule-fixture"),
++  ops = require("../server/operations-service"),
++  { CAS } = require("../server/schedule-repository");
++const deferred = () => {
++  let resolve;
++  return {
++    promise: new Promise((r) => (resolve = r)),
++    resolve: () => resolve(),
++  };
++};
++function pauseWrite(repo, match) {
++  const original = repo.command.bind(repo),
++    seen = deferred(),
++    release = deferred();
++  let paused = false;
++  repo.command = async (...args) => {
++    if (!paused && args[0] === "EVAL" && args[1] === CAS && match(args)) {
++      paused = true;
++      seen.resolve();
++      await release.promise;
++    }
++    return original(...args);
++  };
++  return {
++    seen: seen.promise,
++    release: release.resolve,
++    restore: () => (repo.command = original),
++  };
++}
++test("Redis real: escrita antiga da OS pausada não desfaz início confirmado pela agenda", async (t) => {
++  const repo = await isolatedRedis(t);
++  if (!repo) return;
++  const f = await fixture(repo);
++  let a = (await f.book()).appointment;
++  a = (await f.action(professional("p1"), "accept", a)).appointment;
++  const gate = pauseWrite(repo, (args) =>
++    args.some((v) => typeof v === "string" && v.includes("SERVICE_AUTHORIZED")),
++  );
++  const pending = ops.adminAction(repo, "o1", "authorize-service", {}, admin);
++  try {
++    await gate.seen;
++    f.setNow("2030-01-08T12:00:00Z");
++    a = (await f.action(professional("p1"), "start", a)).appointment;
++  } finally {
++    gate.release();
++  }
++  await pending;
++  gate.restore();
++  const order = await repo.get("o1");
++  assert.equal(order.status, "SERVICE_STARTED");
++  assert.equal((await repo.read()).appointments[a.id].status, "IN_PROGRESS");
++  assert.ok(order.auditTrail.some((e) => e.event === "SERVICE_STARTED"));
++  assert.ok(order.auditTrail.some((e) => e.event === "SERVICE_AUTHORIZED"));
++  assert.ok(order.version >= 2);
++});
++test("Redis real: plano criado durante início antigo força revalidação e impede bypass", async (t) => {
++  const repo = await isolatedRedis(t);
++  if (!repo) return;
++  const f = await fixture(repo);
++  await repo.transaction((s) => {
++    delete s.plans.o1;
++  });
++  const gate = pauseWrite(repo, (args) =>
++    args.some((v) => typeof v === "string" && v.includes("SERVICE_STARTED")),
++  );
++  const pending = ops.providerAction(repo, "o1", "p1", "start");
++  const outcome = assert.rejects(pending, /USE_SCHEDULE_ACTION/);
++  try {
++    await gate.seen;
++    await f.adminMutate("plan", {
++      orderId: "o1",
++      mode: "DIRECT",
++      durationMinutes: 60,
++      crewSize: 1,
++      providerIds: ["p1"],
++      materialsReady: true,
++      reason: "Plano criado durante disputa",
++    });
++  } finally {
++    gate.release();
++  }
++  await outcome;
++  gate.restore();
++  assert.equal((await repo.get("o1")).status, "PROVIDER_ACCEPTED");
++  assert.ok((await repo.read()).plans.o1);
++});
++test("Redis real: save de cópia desatualizada da OS é rejeitado após escrita da agenda", async (t) => {
++  const repo = await isolatedRedis(t);
++  if (!repo) return;
++  const f = await fixture(repo);
++  let a = (await f.book()).appointment;
++  a = (await f.action(professional("p1"), "accept", a)).appointment;
++  const stale = await repo.get("o1");
++  f.setNow("2030-01-08T12:00:00Z");
++  await f.action(professional("p1"), "start", a);
++  await assert.rejects(
++    repo.save({ ...stale, status: "OFFERED" }),
++    /STALE_ORDER/,
++  );
++  assert.equal((await repo.get("o1")).status, "SERVICE_STARTED");
++});
++
++test("Redis real: início revalida hora no retry e recusa pedido que saiu do período reservado", async (t) => {
++  const repo = await isolatedRedis(t);
++  if (!repo) return;
++  const f = await fixture(repo, { duration: 120 });
++  let a = (
++    await f.book({
++      slots: [
++        { start: "2030-01-08T12:00:00Z", end: "2030-01-08T13:00:00Z" },
++        { start: "2030-01-09T12:00:00Z", end: "2030-01-09T13:00:00Z" },
++      ],
++    })
++  ).appointment;
++  a = (await f.action(professional("p1"), "accept", a)).appointment;
++  f.setNow("2030-01-08T12:59:59Z");
++  const gate = pauseWrite(repo, (args) =>
++    args.some((v) => typeof v === "string" && v.includes("SERVICE_STARTED")),
++  );
++  const pending = f.action(professional("p1"), "start", a),
++    outcome = assert.rejects(pending, /INVALID_START/);
++  try {
++    await gate.seen;
++    await repo.transaction((s) => {
++      s.testConcurrentRevision = true;
++    });
++    f.setNow("2030-01-08T13:00:01Z");
++  } finally {
++    gate.release();
++  }
++  await outcome;
++  gate.restore();
++  assert.equal((await repo.get("o1")).status, "PROVIDER_ACCEPTED");
++  assert.equal((await repo.read()).appointments[a.id].status, "CONFIRMED");
++});

@@ -20,7 +20,10 @@ class MemoryScheduleRepository extends MemoryOrderRepository {
       const value = await fn(state, {
         order: (id) => this.get(id),
         provider: (id) => this.getProvider(id),
-        saveOrder: (o) => writes.push(o),
+        saveOrder: (o) => {
+          o.version = (o.version || 0) + 1;
+          writes.push(o);
+        },
       });
       state.revision++;
       for (const order of writes) await this.save(order);
@@ -42,6 +45,11 @@ async function fixture(
 ) {
   let now = Date.parse("2030-01-07T12:00:00Z");
   const service = new ScheduleService(repo, { clock: () => now });
+  const adminMutate = async (action, input) =>
+    service.mutate(admin, action, {
+      expectedRevision: (await repo.read()).revision,
+      ...input,
+    });
   for (const providerId of ["p1", "p2", "p3"])
     await repo.saveProvider({
       providerId,
@@ -81,7 +89,7 @@ async function fixture(
       },
       "key-" + id,
     );
-  await service.mutate(admin, "rule", {
+  await adminMutate("rule", {
     serviceCode: catalog.code,
     mode,
     visitMinutes: 60,
@@ -92,7 +100,7 @@ async function fixture(
     reason: "Teste automatizado",
   });
   for (const id of ["p1", "p2", "p3"]) {
-    await service.mutate(admin, "qualification", {
+    await adminMutate("qualification", {
       providerId: id,
       serviceCodes: [catalog.code],
       specialty: "ELETRICISTA",
@@ -112,7 +120,7 @@ async function fixture(
     });
   }
   for (const orderId of ["o1", "o2"])
-    await service.mutate(admin, "plan", {
+    await adminMutate("plan", {
       orderId,
       mode,
       durationMinutes: duration,
@@ -135,6 +143,7 @@ async function fixture(
   return {
     repo,
     service,
+    adminMutate,
     book,
     action,
     admin,

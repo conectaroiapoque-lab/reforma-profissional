@@ -62,8 +62,12 @@ class ScheduleRepository extends RedisOrderRepository {
       const result = await fn(state, {
         order: (id) => read(`order:${id}`),
         provider: (id) => read(`provider:${id}`),
-        saveOrder: (order) =>
-          writes.set(`order:${order.orderId}`, JSON.stringify(order)),
+        saveOrder: (order) => {
+          const original=JSON.parse(dependencies.get(`order:${order.orderId}`));
+          require("./quote-snapshots").preserve(original,order);
+          order.version = (order.version || 0) + 1;
+          writes.set(`order:${order.orderId}`, JSON.stringify(order));
+        },
       });
       state.revision++;
       if (Buffer.byteLength(JSON.stringify(state)) > 8_000_000)

@@ -1,0 +1,32 @@
+{
+  "source_file": "Reforma_Profissional_3_Precos_BH_RMBH_2026_CHATGPT.csv",
+  "source_sha256": "64d903dcbaffe2fa5775ab7fed9bc326139950ec801109cf8d0efec1d08b9475",
+  "source_services": 242,
+  "active_services": 111,
+  "source_classification_counts": {
+    "DESCRICAO_IDENTICA_CANDIDATA": 20,
+    "SOBREPOSICAO_OU_DESDOBRAMENTO": 63,
+    "ATIVIDADE_CANDIDATA": 37,
+    "NOVO_CANDIDATO_SEM_CONTRAPARTE_DIRETA": 110,
+    "CONFLITO_ESCOPO_NAO_EQUIVALENTE": 12
+  },
+  "candidate_relations": 145,
+  "active_coverage_counts": {
+    "CANDIDATO_DIRETO_NAO_APROVADO": 57,
+    "SEM_CONTRAPARTE_IDENTIFICADA_PRESERVAR_ATIVO": 24,
+    "APENAS_RELACAO_ESCOPO_OU_CONFLITO": 30
+  },
+  "public_reference_comparison_counts": {
+    "VALOR_NOMINAL_DIFERENTE_SEM_DELTA_COMPARAVEL": 66,
+    "VALOR_NOMINAL_IGUAL_SEM_EQUIVALENCIA_COMERCIAL": 10,
+    "ATIVO_QUOTE_SEM_PRECO_FECHADO": 69
+  },
+  "source_assessment_required": 95,
+  "source_assessment_vs_active_fixed_pairs": 6,
+  "existing_quote_relations": 69,
+  "price_comparable_pairs": 0,
+  "approved_mappings": 0,
+  "activated": false,
+  "all_242_require_human_review": true,
+  "classification_method": "Analyst-curated content candidates; exact labels denote description only, never commercial equivalence. No numeric-code join."
+}
