@@ -1,0 +1,43 @@
+{
+  "status": "CSV_COMPARISON_COMPLETE_TECHNICAL_CORRECTIONS_LOCAL_PENDING_REVIEW",
+  "activeVersion": "RMBH-2026-09-v7-launch",
+  "activeServiceCount": 111,
+  "sourceFile": "Reforma_Profissional_3_Precos_BH_RMBH_2026_CHATGPT.csv",
+  "sourceAvailable": true,
+  "sourceServiceCount": 242,
+  "sourceCountEvidence": "242_CSV_ROWS_ALL_13_FIELDS_CHECKED_AGAINST_TXT_OR_CAPTURED_AS_CSV_ONLY",
+  "pricesActivated": false,
+  "mappingsApproved": 0,
+  "fileSha256": {
+    "catalog.js": "1cab234b65fd725461f7a54ea985c25df5f5dcc520245cd23a8ac3971e49157d",
+    "catalog-financial.js": "5af0774936e99f6d962630098d49e75a6b4f8fa2568443f782a526ac5aca8a87",
+    "catalog-v4.js": "a4c3c866f22e43f81dedc5862d1024068bde0142e22844c06b1c941a9c64fd5d",
+    "catalog-v5-candidate.js": "19c856474ffc9293d1e2e3aef04dfc007af73bdb5381fbfb245f0912e782d46c",
+    "catalog-v6-candidate.js": "3e0f3c2cfa13aaa1979c8310b7558cdf2e71e7f2d550825bb74109661256b833",
+    "server/schedule-service.js": "4d85acd520a866a89f4877a998de53a4f2d130543f63a2ae97273fe228b812b2",
+    "server/order-service.js": "a8f2e25fa04d3a6b46834c432b6b0fb024e92555d5350e7ce1ae84bdb2061bf4",
+    "server/contract-authority.js": "0443347e75bff99a5993402e519676ccc498350107b937e23c6a9882a81933aa"
+  },
+  "originallyRequestedSourceFile": "Reforma_Profissional_3_Precos_BH_RMBH_2026_CHATGPT.csv",
+  "sourceFormat": "ORIGINAL_SEMICOLON_CSV",
+  "sourceSha256": "64d903dcbaffe2fa5775ab7fed9bc326139950ec801109cf8d0efec1d08b9475",
+  "sourceInstructionsExecuted": false,
+  "secondarySourceFile": "Reforma_Profissional_Tabela_Precos_ChatGPT_242_Servicos.txt",
+  "secondarySourceSha256": "ceea136e1110ce11a4e629f07c47c6be37d0ca6271ce09d83184a6f994772ebb",
+  "providerPercentagePresent": true,
+  "providerPercentageCalculationBaseKnown": false,
+  "sourceConcordanceContentDifferences": 2,
+  "sourceConcordanceAdditionalCsvField": "% Prestador",
+  "localRuntimeChanges": {
+    "server/schedule-service.js": {
+      "baselineSha256": "4d85acd520a866a89f4877a998de53a4f2d130543f63a2ae97273fe228b812b2",
+      "currentSha256": "1a470e88cfa0c2c0ff4158d952dda83c4e12dd6c6a95c24e41f902cae24ae142",
+      "status": "AUTHORIZED_LOCAL_REVIEW_CORRECTIONS_NOT_DATA_MIGRATION"
+    },
+    "server/order-service.js": {
+      "baselineSha256": "a8f2e25fa04d3a6b46834c432b6b0fb024e92555d5350e7ce1ae84bdb2061bf4",
+      "currentSha256": "8e426ee485f4220550b056d967c9453122c53effb08026492bc9dad5e7338737",
+      "status": "AUTHORIZED_LOCAL_REVIEW_CORRECTIONS_NOT_DATA_MIGRATION"
+    }
+  }
+}

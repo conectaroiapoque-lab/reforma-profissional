@@ -1,0 +1,83 @@
+{
+  "primary_source": "Reforma_Profissional_3_Precos_BH_RMBH_2026_CHATGPT.csv",
+  "csv_sha256": "64d903dcbaffe2fa5775ab7fed9bc326139950ec801109cf8d0efec1d08b9475",
+  "txt_source": "Reforma_Profissional_Tabela_Precos_ChatGPT_242_Servicos.txt",
+  "txt_sha256": "ceea136e1110ce11a4e629f07c47c6be37d0ca6271ce09d83184a6f994772ebb",
+  "csv_bytes": 75219,
+  "txt_bytes": 117567,
+  "encoding": "UTF-8 with optional BOM",
+  "csv_delimiter": ";",
+  "csv_records": 242,
+  "txt_records": 242,
+  "csv_fields": [
+    "Código",
+    "Especialidade",
+    "Serviço",
+    "Unidade",
+    "Valor concorrente (R$)",
+    "Fonte concorrente / referência",
+    "Preço 1 tabela (R$)",
+    "Preço 2 negociação (R$)",
+    "Preço 3 piso (R$)",
+    "Fonte URL",
+    "Comparabilidade",
+    "% Prestador",
+    "Condição de orçamento"
+  ],
+  "shared_fields_per_record": 12,
+  "shared_field_checks": 2904,
+  "total_csv_field_checks_including_percentage": 3146,
+  "shared_results": {
+    "EXACT": 1936,
+    "REPRESENTATION_EQUIVALENT": 966,
+    "CONTENT_DIFFERENT": 2
+  },
+  "by_field": {
+    "Código": {
+      "EXACT": 242
+    },
+    "Especialidade": {
+      "EXACT": 242
+    },
+    "Serviço": {
+      "EXACT": 242
+    },
+    "Unidade": {
+      "EXACT": 242
+    },
+    "Valor concorrente (R$)": {
+      "REPRESENTATION_EQUIVALENT": 242
+    },
+    "Fonte concorrente / referência": {
+      "EXACT": 242
+    },
+    "Preço 1 tabela (R$)": {
+      "REPRESENTATION_EQUIVALENT": 242
+    },
+    "Preço 2 negociação (R$)": {
+      "REPRESENTATION_EQUIVALENT": 241,
+      "CONTENT_DIFFERENT": 1
+    },
+    "Preço 3 piso (R$)": {
+      "REPRESENTATION_EQUIVALENT": 241,
+      "CONTENT_DIFFERENT": 1
+    },
+    "Fonte URL": {
+      "EXACT": 242
+    },
+    "Comparabilidade": {
+      "EXACT": 242
+    },
+    "Condição de orçamento": {
+      "EXACT": 242
+    }
+  },
+  "csv_only_fields": [
+    "% Prestador"
+  ],
+  "csv_only_nonempty_records": 242,
+  "txt_is_lossless_conversion": false,
+  "previous_review_source": "TXT_ONLY; no CSV conversion was performed by the assistant",
+  "conclusion": "TXT omits CSV provider percentage; all shared fields checked independently. No percentage applied to live rules.",
+  "activated": false
+}

@@ -4,7 +4,7 @@ const root=path.resolve(__dirname,".."),out=path.join(root,"dist");
 const officialBrand=path.join(root,"public","assets","brand","reforma-profissional-oficial.jpeg");
 if(!fs.existsSync(officialBrand)||!fs.statSync(officialBrand).isFile()||fs.statSync(officialBrand).size===0)throw new Error("Official brand asset is required: public/assets/brand/reforma-profissional-oficial.jpeg");
 /* Public artifacts are deny-by-default. Server/domain code must never be added here. */
-const entries=["catalog.js","styles.css","landing-pages.css","landing-pages.js","manifest.webmanifest","sw.js","robots.txt","sitemap.xml","icons","public/legal","public/provider","public/admin","public/postal-code.js","prestador","admin","privacidade","solicitar-servico","eletricista-bh","bombeiro-hidraulico-bh","ar-condicionado-bh","pedreiro-bh","marido-de-aluguel-bh"];
+const entries=["catalog.js","styles.css","landing-pages.css","landing-pages.js","manifest.webmanifest","sw.js","robots.txt","sitemap.xml","icons","public/legal","public/provider","public/admin","public/postal-code.js","public/agenda","prestador","admin","privacidade","solicitar-servico","eletricista-bh","bombeiro-hidraulico-bh","ar-condicionado-bh","pedreiro-bh","marido-de-aluguel-bh"];
 fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});
 for(const entry of entries){const source=path.join(root,entry);if(fs.existsSync(source))fs.cpSync(source,path.join(out,entry),{recursive:true});}
 fs.cpSync(path.join(root,"public","assets"),path.join(out,"assets"),{recursive:true});

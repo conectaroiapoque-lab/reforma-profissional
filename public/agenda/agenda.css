@@ -1,0 +1,161 @@
+.agenda {
+  --blue: #092b4c;
+  --yellow: #ffcb32;
+  color: var(--blue);
+  max-width: 1180px;
+  margin: 24px auto;
+  padding: 20px;
+  background: #f4f7fb;
+  border-radius: 18px;
+  font: 16px/1.5 system-ui;
+}
+.agenda * {
+  box-sizing: border-box;
+}
+.agenda h2,
+.agenda h3 {
+  margin: 12px 0;
+}
+.agenda label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+.agenda input,
+.agenda select,
+.agenda textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #9daec0;
+  border-radius: 8px;
+  font: inherit;
+  background: white;
+  color: var(--blue);
+}
+.agenda button,
+.agenda .agenda-link {
+  min-height: 46px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--blue);
+  color: white;
+  font: inherit;
+  cursor: pointer;
+  display: inline-block;
+}
+.agenda button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.agenda button.primary {
+  background: var(--yellow);
+  color: var(--blue);
+  font-weight: 700;
+}
+.agenda button:focus-visible,
+.agenda input:focus-visible,
+.agenda select:focus-visible {
+  outline: 3px solid #287acf;
+  outline-offset: 2px;
+}
+.agenda .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 14px;
+}
+.agenda .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.agenda .appointment,
+.agenda .panel {
+  border: 1px solid #cbd5e1;
+  background: white;
+  padding: 18px;
+  margin: 14px 0;
+  border-radius: 12px;
+  overflow-wrap: anywhere;
+}
+.agenda small {
+  display: block;
+}
+.agenda .badge {
+  background: #e6eef7;
+  padding: 4px 9px;
+  border-radius: 5px;
+  display: inline-block;
+}
+.agenda .calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+  margin: 16px 0;
+}
+.agenda .day {
+  min-height: 85px;
+  background: white;
+  border: 1px solid #cbd5e1;
+  padding: 6px;
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+}
+.agenda .day button {
+  font-size: 0.75rem;
+  padding: 4px;
+  min-height: 40px;
+  width: 100%;
+  margin-top: 4px;
+}
+.agenda [role="status"] {
+  white-space: pre-wrap;
+}
+.agenda details {
+  margin: 14px 0;
+}
+.agenda summary {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 12px;
+  background: #e6eef7;
+}
+.agenda .error {
+  color: #952318;
+}
+.agenda textarea {
+  min-height: 85px;
+}
+.agenda .notice {
+  border-left: 4px solid var(--yellow);
+  padding: 12px;
+  background: #fffbea;
+}
+.agenda pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.agenda [hidden] {
+  display: none !important;
+}
+@media (max-width: 600px) {
+  .agenda {
+    padding: 12px;
+    margin: 12px 0;
+  }
+  .agenda .calendar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .agenda .day {
+    min-height: 70px;
+  }
+  .agenda button {
+    flex-grow: 1;
+  }
+  .agenda h2 {
+    font-size: 1.4rem;
+  }
+}

@@ -140,3 +140,7 @@ A evolução incremental para despacho sob demanda está documentada em:
 - [Contrato conceitual da API](docs/api-contract.md)
 
 Os módulos locais são contratos e implementações leves para o MVP. Eles não substituem validação server-side, transações, autenticação ou infraestrutura de produção.
+
+## Agenda inteligente
+
+A agenda de visitas técnicas e execução, os painéis do profissional/CAC, o controle transacional de conflitos, as regras de habilitação e as instruções de desenvolvimento estão em [docs/agenda-inteligente.md](docs/agenda-inteligente.md). O catálogo ativo V7 foi preservado. A confirmação exige os aceites do cliente e de todos os profissionais; WhatsApp permanece manual.

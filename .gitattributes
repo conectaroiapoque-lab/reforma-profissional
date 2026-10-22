@@ -1,0 +1,4 @@
+# Keep review exports byte-for-byte; CSV generators use standard CRLF records.
+review/**/*.csv whitespace=cr-at-eol
+# Historical patch artifacts contain significant single-space context lines.
+review/technical-local.diff -whitespace
