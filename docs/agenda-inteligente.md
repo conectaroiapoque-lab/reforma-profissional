@@ -89,7 +89,7 @@ Ainda exigem configuração/validação externa: conexão Redis REST e login com
 
 Custos: nenhuma biblioteca de calendário/IA/WhatsApp paga foi adicionada. Redis REST e hospedagem seguem o provedor atual, com consumo adicional de armazenamento e operações; mapas/roteamento, modelo de IA, mídia de vídeo e API oficial WhatsApp seriam integrações opcionais cobradas pelos respectivos provedores. O deslocamento atual é uma margem conservadora aprovada pelo CAC, não ETA de mapas.
 
-A criação da PR depende de acesso à API do GitHub, bloqueada nesta execução pelo proxy (CONNECT 403). A leitura Git do remoto funciona. O envio da branch é verificado separadamente e seu resultado deve acompanhar a entrega; uma descrição pronta não equivale a uma PR criada. Não faça merge nem deploy sem autorização.
+A branch `feat/agenda-inteligente` foi enviada e a [Pull Request #42](https://github.com/conectaroiapoque-lab/reforma-profissional/pull/42) foi criada em rascunho para revisão. A API do GitHub apresentou CONNECT 403 inicialmente, mas a operação de criação da PR foi concluída posteriormente. Nenhum merge ou deploy foi executado. Não faça merge nem deploy sem autorização.
 
 ## Arquivos desta entrega
 
